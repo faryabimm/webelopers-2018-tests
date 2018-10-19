@@ -33,4 +33,18 @@ class User:
         return True
 
     def login(self, driver):
-        pass
+        navbar_login = ut.find_element_id(driver, "navbar_login", driver)
+        if navbar_login is None:
+            return False
+        navbar_login.click()
+        id_username = ut.find_element_id(driver, "id_username", driver)
+        id_password = ut.find_element_id(driver, "id_password", driver)
+        if id_username is None or id_password is None:
+            return False
+        id_username.send_keys(self.username)
+        id_password.send_keys(self.password)
+        login_submit = ut.find_element_id(driver, "login_submit", driver)
+        if login_submit is None:
+            return False
+        login_submit.click()
+        return True

@@ -3,8 +3,8 @@ import string
 
 import utils as ut
 
+
 def connect(ip, driver):
-    driver.set_page_load_timeout(5)
     try:
         driver.get(ip)
         return True
@@ -43,6 +43,15 @@ def find_element_tag(look_in, look_for, driver):
         return None
 
 
+def find_element_name(look_in, look_for, driver):
+    try:
+        return look_in.find_element_by_name(look_for)
+    except:
+        print("{} not found".format(look_for))
+        driver.close()
+        return None
+
+
 def find_css_selector_element(look_in, css_selector, driver):
     try:
         return look_in.find_element_by_css_selector(css_selector)
@@ -74,6 +83,6 @@ def random_email():
 
 def login_to_django_admin(username, password, driver, ip):
     driver.get(ip + "/admin/auth/user/")
-    ut.find_css_selector_element(driver, "form input[name=username]", driver).send_keys(username)
-    ut.find_css_selector_element(driver, "form input[name=password]", driver).send_keys(password)
+    ut.find_element_name(driver, "username", driver).send_keys(username)
+    ut.find_element_name(driver, "password", driver).send_keys(password)
     ut.find_css_selector_element(driver, "form input[type=submit]", driver).click()
