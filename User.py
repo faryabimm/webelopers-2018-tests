@@ -51,3 +51,10 @@ class User:
             return False
         login_submit.click()
         return True
+
+    def logout(self, driver):
+        navbar_logout = ut.find_element_id(driver, "navbar_logout", driver)
+        if navbar_logout is None:
+            return False
+        navbar_logout.click()
+        return True

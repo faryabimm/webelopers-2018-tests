@@ -18,9 +18,8 @@ def test_1(ip):
     if not check_navbar(False):
         return False
 
-    welcome = ut.find_element_id(driver, "welcome", driver)
-    if welcome.text != "به سامانه استاد جو خوش آمدید.":
-        print("incorrect welcome message")
+    if "به سامانه استادجو خوش آمدید." not in driver.page_source:
+        print("incorrect or not found welcome message")
         driver.close()
         return False
 
@@ -173,6 +172,32 @@ def test_5(ip, driver):
         return False
 
 
+def test_7(ip, driver):
+    if not ut.connect(ip, driver):
+        return False
+    if not check_navbar(False):
+        return False
+    navbar = ut.find_element_id(driver, "navbar", driver)
+    if navbar is None:
+        return False
+    user_1 = User()
+    if not user_1.signup(driver):
+        print("during test_7 signup failed")
+        return False
+    if not user_1.login(driver):
+        print("during test_7 login failed")
+        return False
+    if not check_navbar(True):
+        return False
+    user_1.logout(driver)
+    if "به سامانه استادجو خوش آمدید." not in driver.page_source:
+        print("incorrect or not found welcome message")
+        return False
+    if not check_navbar(False):
+        return False
+    return True
+
+
 print(datetime.datetime.now())
-print(test_4("http://127.0.0.1:8000"))
+print(test_7("http://127.0.0.1:8000", driver))
 print(datetime.datetime.now())
