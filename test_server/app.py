@@ -7,9 +7,7 @@ import requests
 from flask import Flask, request, Response
 from timeout_decorator import timeout, TimeoutError
 
-import configuration as config
-import logger
-import tests
+from test_server import configuration as config, logger, tests
 
 app = Flask(__name__)
 
