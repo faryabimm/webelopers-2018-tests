@@ -3,8 +3,6 @@ import time
 
 from selenium import webdriver
 import utils as ut
-import random
-import string
 
 from User import User
 
@@ -55,7 +53,8 @@ def check_navbar(logged_in):
     return True
 
 
-def test_2(ip, user):
+def test_2(ip, driver):
+    user = User()
     if not ut.connect(ip, driver):
         return False
     if not check_navbar(False):
@@ -64,36 +63,17 @@ def test_2(ip, user):
     home_source = driver.page_source
     if not user.signup(driver):
         return False
-    redirect_url = driver.current_url
     if driver.current_url != home_url or driver.page_source != home_source:
         print("redirect to home after signup failed")
         return False
-    # todo: username password to django admin required
-    username = 'mrtaalebi'
-    password = '1234\',.p'
-    ut.login_to_django_admin(username, password, driver, ip)
-    ut.find_element_id(driver, "searchbar", driver).send_keys(user.username)
-    ut.find_css_selector_element(driver, "form input[type=submit]", driver).click()
-    field_username = ut.find_element_class(driver, "field-username", driver)
-    if field_username is None:
-        print("field_username not found in database")
-        return False
-    link_username = ut.find_element_tag(field_username, "a", driver)
-    if link_username is None:
-        print("user not found in database")
-        return False
-    link_username.click()
-    field_first_name = ut.find_element_id(driver, "id_first_name", driver).get_attribute("value")
-    field_last_name = ut.find_element_id(driver, "id_last_name", driver).get_attribute("value")
-    field_email = ut.find_element_id(driver, "id_email", driver).get_attribute("value")
-    if field_first_name != user.first_name or field_last_name != user.last_name or field_email != user.email:
-        print("user information haven't saved correctly")
-        return False
 
+    ut.login_to_django_admin(username='mrtaalebi', password='1234\',.p', driver=driver, ip=ip)
+    if not ut.check_user_in_django_admin(ip, user, driver):
+        return False
     driver.delete_all_cookies()
+
     return True
 
-login_error_message = "نام کاربری یا گذرواژه غلط است"
 
 # user assumed to be signed up to the site
 # this test is dependent to test 2 for user signup
@@ -107,6 +87,7 @@ def test_3(ip, user_1):
     # checking right user
     if not check_navbar(True):
         return False
+    login_error_message = "نام کاربری یا گذرواژه غلط است"
     if login_error_message in driver.page_source:
         return False
     driver.delete_all_cookies()
@@ -143,39 +124,55 @@ def test_4(ip):
         return False
     driver.delete_all_cookies()
 
-    user_2 = User()
-
     # username error
+    user_2 = User()
     user_2.username = user_1.username
     user_2.signup(driver)
-    source_3 = driver.page_source
-    if user_exists not in source_3 or password_mismatch in source_3 or email_exists in source_3:
+    source_2 = driver.page_source
+    if user_exists not in source_2 or password_mismatch in source_2 or email_exists in source_2:
         return False
-    user_2.username = ut.random_string(10)
     driver.delete_all_cookies()
 
     # email error
-    user_2.email = user_1.email
-    user_2.signup(driver)
-    source_4 = driver.page_source
-    if user_exists in source_4 or password_mismatch in source_4 or email_exists not in source_4:
+    user_3 = User()
+    user_3.email = user_1.email
+    user_3.signup(driver)
+    source_3 = driver.page_source
+    if user_exists in source_3 or password_mismatch in source_3 or email_exists not in source_3:
         return False
-    user_2.email = ut.random_email()
     driver.delete_all_cookies()
 
     # password mismatch error
-    user_2.signup(driver, send_mismatched_password=True)
-    source_5 = driver.page_source
-    if user_exists in source_5 or password_mismatch not in source_5 or email_exists in source_5:
+    user_4 = User()
+    user_4.signup(driver, send_mismatched_password=True)
+    source_4 = driver.page_source
+    if user_exists in source_4 or password_mismatch not in source_4 or email_exists in source_4:
         return False
     driver.delete_all_cookies()
 
+    ut.login_to_django_admin(username='mrtaalebi', password='1234\',.p', driver=driver, ip=ip)
+    if not ut.check_user_in_django_admin(ip, user_1, driver):
+        return False
+    print("1")
+    if ut.check_user_in_django_admin(ip, user_2, driver):
+        return False
+    print("2")
+    if ut.check_user_in_django_admin(ip, user_3, driver):
+        return False
+    print("3")
+    if ut.check_user_in_django_admin(ip, user_4, driver):
+        return False
+    print("4")
     return True
 
 
+def test_5(ip, driver):
+    if not ut.connect(ip, driver):
+        return False
+    if not check_navbar(False):
+        return False
+
+
 print(datetime.datetime.now())
 print(test_4("http://127.0.0.1:8000"))
 print(datetime.datetime.now())
-print(test_4("http://127.0.0.1:8000"))
-print(datetime.datetime.now())
-driver.close()
