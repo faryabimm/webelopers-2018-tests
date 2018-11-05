@@ -9,7 +9,7 @@ class User:
         self.email = ut.random_email()
         self.password = ut.random_string(10)
 
-    def signup(self, driver):
+    def signup(self, driver, send_mismatched_password=False):
         ut.find_element_id(driver, "navbar_signup", driver).click()
         id_first_name = ut.find_element_id(driver, "id_first_name", driver)
         id_last_name = ut.find_element_id(driver, "id_last_name", driver)
@@ -25,7 +25,10 @@ class User:
         id_username.send_keys(self.username)
         id_email.send_keys(self.email)
         id_password1.send_keys(self.password)
-        id_password2.send_keys(self.password)
+        if send_mismatched_password:
+            id_password2.send_keys(self.password + ut.random_string(10))
+        else:
+            id_password2.send_keys(self.password)
         signup_submit = ut.find_element_id(driver, "signup_submit", driver)
         if signup_submit is None:
             return False

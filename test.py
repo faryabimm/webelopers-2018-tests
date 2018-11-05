@@ -1,3 +1,4 @@
+import datetime
 import time
 
 from selenium import webdriver
@@ -92,6 +93,7 @@ def test_2(ip, user):
     driver.delete_all_cookies()
     return True
 
+login_error_message = "نام کاربری یا گذرواژه غلط است"
 
 # user assumed to be signed up to the site
 # this test is dependent to test 2 for user signup
@@ -105,6 +107,8 @@ def test_3(ip, user_1):
     # checking right user
     if not check_navbar(True):
         return False
+    if login_error_message in driver.page_source:
+        return False
     driver.delete_all_cookies()
     # checking wrong user
     if not ut.connect(ip, driver):
@@ -112,14 +116,66 @@ def test_3(ip, user_1):
     wrong_user = User()
     if not wrong_user.login(driver):
         return False
+    if login_error_message not in driver.page_source:
+        return False
     if not check_navbar(False):
         return False
 
     driver.delete_all_cookies()
-    driver.close()
     return True
 
 
-user = User()
-test_2("http://127.0.0.1:8000", user)
-print(test_3("http://127.0.0.1:8000", user))
+def test_4(ip):
+    if not ut.connect(ip, driver):
+        return False
+    if not check_navbar(False):
+        return False
+    user_exists = "کاربری با نام کاربری وارد شده وجود دارد"
+    email_exists = "کاربری با ایمیل وارد شده وجود دارد"
+    password_mismatch = "گذرواژه و تکرار گذرواژه یکسان نیستند"
+
+    # all correct
+    user_1 = User()
+    if not user_1.signup(driver):
+        return False
+    source_1 = driver.page_source
+    if user_exists in source_1 or password_mismatch in source_1 or email_exists in source_1:
+        return False
+    driver.delete_all_cookies()
+
+    user_2 = User()
+
+    # username error
+    user_2.username = user_1.username
+    user_2.signup(driver)
+    source_3 = driver.page_source
+    if user_exists not in source_3 or password_mismatch in source_3 or email_exists in source_3:
+        return False
+    user_2.username = ut.random_string(10)
+    driver.delete_all_cookies()
+
+    # email error
+    user_2.email = user_1.email
+    user_2.signup(driver)
+    source_4 = driver.page_source
+    if user_exists in source_4 or password_mismatch in source_4 or email_exists not in source_4:
+        return False
+    user_2.email = ut.random_email()
+    driver.delete_all_cookies()
+
+    # password mismatch error
+    user_2.signup(driver, send_mismatched_password=True)
+    source_5 = driver.page_source
+    if user_exists in source_5 or password_mismatch not in source_5 or email_exists in source_5:
+        return False
+    driver.delete_all_cookies()
+
+    return True
+
+
+print(datetime.datetime.now())
+print(test_4("http://127.0.0.1:8000"))
+print(datetime.datetime.now())
+print(test_4("http://127.0.0.1:8000"))
+print(datetime.datetime.now())
+driver.close()
