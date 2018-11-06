@@ -3,13 +3,12 @@ from ast import literal_eval
 from datetime import datetime, timedelta
 from threading import Thread
 
-import requests
-from flask import Flask, request, Response
-from timeout_decorator import timeout, TimeoutError
-
 import configuration as config
 import logger
+import requests
 import tests
+from flask import Flask, request, Response
+from timeout_decorator import timeout, TimeoutError
 
 app = Flask(__name__)
 
@@ -75,12 +74,13 @@ def worker_run_tests(ip, test_order):
             test_function = getattr(tests, test_name)
 
             try:
-                test_result, string_output = run_test(test_function, ip)
+                test_result, string_output, stack_trace = run_test(test_function, ip)
             except TimeoutError:
-                test_result, string_output = False, 'timeout'
+                test_result, string_output, stack_trace = False, 'timeout', 'timeout'
 
             test_results[test_name] = test_result
             test_results['{}_log'.format(test_name)] = string_output
+            test_results['{}_trace'.format(test_name)] = stack_trace
 
     else:
         for entry in dir(tests):
@@ -88,12 +88,13 @@ def worker_run_tests(ip, test_order):
                 test_function = getattr(tests, entry)
 
                 try:
-                    test_result, string_output = run_test(test_function, ip)
+                    test_result, string_output, stack_trace = run_test(test_function, ip)
                 except TimeoutError:
-                    test_result, string_output = False, 'timeout'
+                    test_result, string_output, stack_trace = False, 'timeout', 'timeout'
 
                 test_results[entry] = test_result
                 test_results['{}_log'.format(entry)] = string_output
+                test_results['{}_trace'.format(entry)] = stack_trace
 
     return test_results
 
@@ -120,10 +121,10 @@ def process_request(ip, group_id, test_order):
 
 @timeout(config.TEST_TIMEOUT_S, use_signals=False)
 def run_test(test_function, ip):
-    result, string_output = test_function(
+    result, string_output, stack_trace = test_function(
         # ip
     )
-    return result, string_output
+    return result, string_output, stack_trace
 
 
 def runserver(port=config.PORT):
