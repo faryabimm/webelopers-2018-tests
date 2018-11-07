@@ -1,5 +1,5 @@
-import test_server.utils as ut
-from test_server.User import User
+import utils as ut
+from User import User
 
 
 def failed(test, message):
@@ -10,7 +10,7 @@ def passed(test):
     return True, 'TEST {}: passed!'.format(test)
 
 
-def test_1(ip, driver):
+def test_1(ip, group_id, driver):
     msg = ''
     if not ut.connect(ip, driver, msg):
         return failed('1', msg)
@@ -29,7 +29,7 @@ def test_1(ip, driver):
     return passed('1')
 
 
-def test_2(ip, driver):
+def test_2(ip, group_id, driver):
     msg = ''
     user = User()
     if not ut.connect(ip, driver, msg):
@@ -42,7 +42,7 @@ def test_2(ip, driver):
         return failed('2', msg)
     if driver.current_url != home_url or driver.page_source != home_source:
         return failed('2', 'redirect to home after signup failed')
-    ut.login_to_django_admin(username='mrtaalebi', password='1234\',.p', driver=driver, ip=ip, msg=msg)
+    ut.login_to_django_admin(group_id=group_id, driver=driver, ip=ip, msg=msg)
     if not ut.check_user_in_django_admin(ip, user, driver, msg):
         return failed('2', msg)
 
@@ -51,7 +51,7 @@ def test_2(ip, driver):
 
 # user assumed to be signed up to the site
 # this test is dependent to test 2 for user signup
-def test_3(ip, driver):
+def test_3(ip, group_id, driver):
     msg = ''
     if not ut.connect(ip, driver, msg):
         return failed('3', msg)
@@ -81,7 +81,7 @@ def test_3(ip, driver):
     return passed('3')
 
 
-def test_4(ip, driver):
+def test_4(ip, group_id, driver):
     msg = ''
     if not ut.connect(ip, driver, msg):
         return failed('4', msg)
@@ -127,7 +127,7 @@ def test_4(ip, driver):
     if user_exists in source_4 or password_mismatch not in source_4 or email_exists in source_4:
         return failed('4', error_msg)
 
-    ut.login_to_django_admin(username='mrtaalebi', password='1234\',.p', driver=driver, ip=ip, msg=msg)
+    ut.login_to_django_admin(group_id=group_id, driver=driver, ip=ip, msg=msg)
     if not ut.check_user_in_django_admin(ip, user_1, driver, msg):
         return failed('4', msg)
     if ut.check_user_in_django_admin(ip, user_2, driver, msg):
@@ -139,15 +139,15 @@ def test_4(ip, driver):
     return passed('4')
 
 
-def test_5(ip, driver):
+def test_5(ip, group_id, driver):
     return False, 'PASS', 'PASS'
 
 
-def test_6(ip, driver):
+def test_6(ip, gruop_id, driver):
     return False, 'PASS', 'PASS'
 
 
-def test_7(ip, driver):
+def test_7(ip, group_id, driver):
     msg = ''
     if not ut.connect(ip, driver, msg):
         return failed('7', msg)

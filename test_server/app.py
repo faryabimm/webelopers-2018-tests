@@ -11,6 +11,8 @@ from flask import Flask, request, Response
 from selenium import webdriver
 from timeout_decorator import timeout, TimeoutError
 
+import utils
+
 app = Flask(__name__)
 
 group_status = {}
@@ -50,7 +52,6 @@ def handle_request():
         return Response('malformed post request data.')
 
     group_id = request_data['group_id']
-
     if test_and_set_active(group_id):
         logger.log_info('lock acquired for group_id', group_id)
         ip = request_data['ip']
@@ -67,7 +68,7 @@ def handle_request():
         return "error - existing test in progress"
 
 
-def worker_run_tests(ip, test_order):
+def worker_run_tests(ip, test_order, group_id):
     test_results = {}
     if test_order is not None:
         for test_id in test_order:
@@ -75,7 +76,7 @@ def worker_run_tests(ip, test_order):
             test_function = getattr(tests, test_name)
 
             try:
-                test_result, string_output, stack_trace = run_test(test_function, ip)
+                test_result, string_output, stack_trace = run_test(test_function, ip, group_id)
             except TimeoutError:
                 test_result, string_output, stack_trace = False, 'timeout', 'timeout'
 
@@ -89,7 +90,7 @@ def worker_run_tests(ip, test_order):
                 test_function = getattr(tests, entry)
 
                 try:
-                    test_result, string_output, stack_trace = run_test(test_function, ip)
+                    test_result, string_output, stack_trace = run_test(test_function, ip, group_id)
                 except TimeoutError:
                     test_result, string_output, stack_trace = False, 'timeout', 'timeout'
 
@@ -102,7 +103,7 @@ def worker_run_tests(ip, test_order):
 
 def worker_function(ip, group_id, test_order):
     logger.log_info('running tests for group_id', group_id, 'on ip address', ip)
-    test_results = worker_run_tests(ip, test_order)
+    test_results = worker_run_tests(ip, test_order, group_id)
     logger.log_info('releasing lock for group_id', group_id)
     deactivate_status(group_id)
     logger.log_info('reporting test results for group_id', group_id, 'on ip address', ip, 'to competition server')
@@ -121,10 +122,10 @@ def process_request(ip, group_id, test_order):
 
 
 @timeout(config.TEST_TIMEOUT_S, use_signals=False)
-def run_test(test_function, ip):
+def run_test(test_function, ip, group_id):
     driver = webdriver.Chrome()
     result, string_output = test_function(
-        ip, driver
+        ip, group_id, driver
     )
     driver.delete_all_cookies()
     driver.close()
@@ -137,6 +138,9 @@ def runserver(port=config.PORT):
 
 if __name__ == '__main__':
     # print(run_test(tests.test_7, None))
+
+    utils.load_admins("admins.json")
+
     if len(sys.argv) > 1:
         server_port = int(sys.argv[1])
         logger.log_info('starting server on custom port', server_port)

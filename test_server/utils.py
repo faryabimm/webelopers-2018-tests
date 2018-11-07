@@ -1,3 +1,4 @@
+import json
 import random
 import string
 
@@ -44,7 +45,7 @@ def find_element_name(look_in, look_for, msg):
         msg += "{} not found".format(look_for)
         return None
 
-    
+
 def find_css_selector_element(look_in, css_selector, msg):
     try:
         return look_in.find_element_by_css_selector(css_selector)
@@ -90,9 +91,26 @@ def check_navbar(logged_in, driver, msg):
     return True
 
 
-def login_to_django_admin(username, password, driver, ip, msg):
-    driver.get(ip + "/admin/auth/user/")
+admins = {}
 
+
+def load_admins(json_file):
+    try:
+        with open(json_file) as f:
+            admins = json.load(f)
+    except:
+        raise Exception("\033[91m FAILED LOADING admins.json \033[0m")
+
+
+def get_admin(group_id):
+    if group_id not in admins:
+        raise Exception("\033[91m NO USERNAME AND PASSWORD FOUND FOR GROUP_ID {} \033[0m".format(group_id))
+    return admins[group_id]['username'], admins[group_id]['password']
+
+
+def login_to_django_admin(group_id, driver, ip, msg):
+    driver.get(ip + "/admin/auth/user/")
+    username, password = get_admin(group_id)
     find_element_name(driver, "username", msg).send_keys(username)
     find_element_name(driver, "password", msg).send_keys(password)
     find_css_selector_element(driver, "form input[type=submit]", msg).click()
