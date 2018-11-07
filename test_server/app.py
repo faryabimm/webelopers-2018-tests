@@ -76,7 +76,10 @@ def worker_run_tests(ip, test_order, group_id):
             test_function = getattr(tests, test_name)
 
             try:
-                test_result, string_output, stack_trace = run_test(test_function, ip, group_id)
+                driver = webdriver.Chrome()
+                test_result, string_output, stack_trace = run_test(test_function, ip, group_id, driver)
+                driver.delete_all_cookies()
+                driver.close()
             except TimeoutError:
                 test_result, string_output, stack_trace = False, 'timeout', 'timeout'
 
@@ -90,7 +93,10 @@ def worker_run_tests(ip, test_order, group_id):
                 test_function = getattr(tests, entry)
 
                 try:
-                    test_result, string_output, stack_trace = run_test(test_function, ip, group_id)
+                    driver = webdriver.Chrome()
+                    test_result, string_output, stack_trace = run_test(test_function, ip, group_id, driver)
+                    driver.delete_all_cookies()
+                    driver.close()
                 except TimeoutError:
                     test_result, string_output, stack_trace = False, 'timeout', 'timeout'
 
@@ -122,13 +128,10 @@ def process_request(ip, group_id, test_order):
 
 
 @timeout(config.TEST_TIMEOUT_S, use_signals=False)
-def run_test(test_function, ip, group_id):
-    driver = webdriver.Chrome()
+def run_test(test_function, ip, group_id, driver):
     result, string_output = test_function(
         ip, group_id, driver
     )
-    driver.delete_all_cookies()
-    driver.close()
     return result, string_output, 'HMM'
 
 
