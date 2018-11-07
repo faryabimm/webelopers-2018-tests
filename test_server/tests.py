@@ -58,6 +58,11 @@ def test_3(ip, group_id, driver):
     if not ut.check_navbar(False, driver, msg):
         return failed('3', msg)
     user_1 = User()
+    if not user_1.signup(driver, msg):
+        return failed('3', msg)
+    driver.delete_all_cookies()
+    if not ut.connect(ip, driver, msg):
+        return failed('3', msg)
     if not user_1.login(driver, msg):
         return failed('3', msg)
     # checking right user

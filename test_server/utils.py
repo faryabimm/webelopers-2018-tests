@@ -98,13 +98,14 @@ def load_admins(json_file):
     try:
         with open(json_file) as f:
             admins = json.load(f)
-        print(admins)
+            return admins
     except:
         raise Exception("\033[91m FAILED LOADING admins.json \033[0m")
 
 
 def get_admin(group_id):
-    if group_id not in admins:
+    admins = load_admins("admins.json")
+    if group_id not in admins.keys():
         raise Exception("\033[91m NO USERNAME AND PASSWORD FOUND FOR GROUP_ID {} \033[0m".format(group_id))
     return admins[group_id]['username'], admins[group_id]['password']
 
