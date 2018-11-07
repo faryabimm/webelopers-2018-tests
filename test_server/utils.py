@@ -98,6 +98,7 @@ def load_admins(json_file):
     try:
         with open(json_file) as f:
             admins = json.load(f)
+        print(admins)
     except:
         raise Exception("\033[91m FAILED LOADING admins.json \033[0m")
 
