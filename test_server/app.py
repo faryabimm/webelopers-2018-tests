@@ -8,6 +8,7 @@ import logger
 import requests
 import tests
 from flask import Flask, request, Response
+from selenium import webdriver
 from timeout_decorator import timeout, TimeoutError
 
 app = Flask(__name__)
@@ -121,10 +122,13 @@ def process_request(ip, group_id, test_order):
 
 @timeout(config.TEST_TIMEOUT_S, use_signals=False)
 def run_test(test_function, ip):
-    result, string_output, stack_trace = test_function(
-        # ip
+    driver = webdriver.Chrome()
+    result, string_output = test_function(
+        ip, driver
     )
-    return result, string_output, stack_trace
+    driver.delete_all_cookies()
+    driver.close()
+    return result, string_output, 'HMM'
 
 
 def runserver(port=config.PORT):
