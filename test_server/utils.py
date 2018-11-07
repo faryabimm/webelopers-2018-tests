@@ -1,6 +1,7 @@
 import random
 import string
 
+
 def connect(ip, driver, msg):
     try:
         driver.get(ip)
@@ -73,17 +74,17 @@ def random_email():
 
 
 def check_navbar(logged_in, driver, msg):
-    navbar = ut.find_element_id(driver, "navbar", msg)
+    navbar = find_element_id(driver, "navbar", msg)
     if navbar is None:
         return False
-    navbar_home = ut.find_element_id(navbar, "navbar_home", msg)
+    navbar_home = find_element_id(navbar, "navbar_home", msg)
     if not logged_in:
-        navbar_login = ut.find_element_id(navbar, "navbar_login", msg)
-        navbar_signup = ut.find_element_id(navbar, "navbar_signup", msg)
+        navbar_login = find_element_id(navbar, "navbar_login", msg)
+        navbar_signup = find_element_id(navbar, "navbar_signup", msg)
         if navbar_login is None or navbar_signup is None or navbar_home is None:
             return False
     else:
-        navbar_logout = ut.find_element_id(navbar, "navbar_logout", msg)
+        navbar_logout = find_element_id(navbar, "navbar_logout", msg)
         if navbar_home is None or navbar_logout is None:
             return False
     return True

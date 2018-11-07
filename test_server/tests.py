@@ -1,5 +1,5 @@
-import utils as ut
-from User import User
+import test_server.utils as ut
+from test_server.User import User
 
 
 def failed(test, message):

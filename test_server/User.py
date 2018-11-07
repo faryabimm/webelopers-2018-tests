@@ -1,4 +1,4 @@
-import utils as ut
+import test_server.utils as ut
 
 
 class User:
