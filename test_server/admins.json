@@ -7,6 +7,11 @@
   "1" : {
     "username" : "mrtaalebi",
     "password" : "1234',.p"
+  },
+
+  "2" : {
+    "username" : "admin",
+    "password" : "ramzekhafan"
   }
 
 }

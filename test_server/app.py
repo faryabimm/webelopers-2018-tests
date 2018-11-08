@@ -76,7 +76,9 @@ def worker_run_tests(ip, test_order, group_id):
             test_function = getattr(tests, test_name)
 
             try:
-                driver = webdriver.Chrome()
+                options = webdriver.ChromeOptions()
+                options.add_argument('headless')
+                driver = webdriver.Chrome(chrome_options=options)
                 test_result, string_output, stack_trace = run_test(test_function, ip, group_id, driver)
                 driver.delete_all_cookies()
                 driver.close()
@@ -93,7 +95,9 @@ def worker_run_tests(ip, test_order, group_id):
                 test_function = getattr(tests, entry)
 
                 try:
-                    driver = webdriver.Chrome()
+                    options = webdriver.ChromeOptions()
+                    options.add_argument('headless')
+                    driver = webdriver.Chrome(chrome_options=options)
                     test_result, string_output, stack_trace = run_test(test_function, ip, group_id, driver)
                     driver.delete_all_cookies()
                     driver.close()
