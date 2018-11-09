@@ -196,7 +196,6 @@ def test_5(ip, group_id, driver):
 
 
 def test_6(ip, gruop_id, driver):
-
     return False, 'PASS', 'PASS'
 
 
@@ -221,3 +220,30 @@ def test_7(ip, group_id, driver):
     if not ut.check_navbar(False, driver, msg):
         return failed('7', msg)
     return passed('7')
+
+
+def test_8(ip, group_id, driver):
+    msg = ''
+    if not ut.connect(ip, driver, msg):
+        return failed('8', msg)
+    if not ut.check_navbar(False, driver, msg):
+        return failed('8', msg)
+    navbar = ut.find_element_id(driver, "navbar", msg)
+    if navbar is None:
+        return failed('8', msg)
+    profile = ut.find_element_id(navbar, "navbar_profile", msg)
+    if profile is not None:
+        return failed('8', "profile link on navbar before login")
+    user_1 = User()
+    if not user_1.signup(driver, msg):
+        return failed('8', msg)
+    if not user_1.login(driver, msg):
+        return failed('8', msg)
+    profile = ut.find_element_id(navbar, "navbar_profile", msg)
+    if profile is None:
+        return failed('8', msg)
+    profile.click()
+    source = driver.page_source
+    if user_1.first_name not in source or user_1.last_name not in source or user_1.username not in source:
+        return failed('8', "incorrect or wrong user profile information")
+    return passed('8')
