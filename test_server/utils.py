@@ -54,6 +54,14 @@ def find_css_selector_element(look_in, css_selector, msg):
         return None
 
 
+def find_xpath_element(look_in, xpath, msg):
+    try:
+        return look_in.find_elements_by_xpath(xpath)
+    except:
+        msg += "{} not found".format(xpath)
+        return None
+
+
 def fill_field(field, text, msg):
     try:
         field.send_keys(text)
@@ -111,7 +119,7 @@ def get_admin(group_id):
 
 
 def login_to_django_admin(group_id, driver, ip, msg):
-    driver.get(ip + "/admin/auth/user/")
+    driver.get(ip + "/admin/login/")
     username, password = get_admin(group_id)
     find_element_name(driver, "username", msg).send_keys(username)
     find_element_name(driver, "password", msg).send_keys(password)
@@ -120,22 +128,17 @@ def login_to_django_admin(group_id, driver, ip, msg):
 
 def check_user_in_django_admin(ip, user, driver, msg):
     # todo: username password to django admin required
-    driver.get(ip + "/admin/auth/user/")
-    find_element_id(driver, "searchbar", msg).send_keys(user.username)
-    find_css_selector_element(driver, "form input[type=submit]", msg).click()
-    field_username = find_element_class(driver, "field-username", msg)
-    if field_username is None:
-        msg += 'field_username not found in database'
+    driver.get(ip + "/admin/people/user/")
+    username_link = None
+    for a in driver.find_elements_by_xpath("//a"):
+        if a.text == user.username:
+            username_link = a
+            break
+    if username_link is None:
         return False
-    link_username = find_element_tag(field_username, "a", msg)
-    if link_username is None:
-        msg += "user not found in database"
-        return False
-    link_username.click()
-    field_first_name = find_element_id(driver, "id_first_name", msg).get_attribute("value")
-    field_last_name = find_element_id(driver, "id_last_name", msg).get_attribute("value")
-    field_email = find_element_id(driver, "id_email", msg).get_attribute("value")
-    if field_first_name != user.first_name or field_last_name != user.last_name or field_email != user.email:
-        msg += "user information haven't saved correctly"
+    username_link.click()
+    source = driver.page_source
+    if user.first_name not in source or user.last_name not in source or user.email not in source:
+        msg += "user information have not been saved correctly"
         return False
     return True

@@ -102,9 +102,11 @@ def test_4(ip, group_id, driver):
     user_1 = User()
     if not user_1.signup(driver, msg):
         return failed('4', msg)
+    print("if1")
     source_1 = driver.page_source
     if user_exists in source_1 or password_mismatch in source_1 or email_exists in source_1:
         return failed('4', error_msg)
+    print("if2")
     driver.delete_all_cookies()
 
     # username error
@@ -114,6 +116,7 @@ def test_4(ip, group_id, driver):
     source_2 = driver.page_source
     if user_exists not in source_2 or password_mismatch in source_2 or email_exists in source_2:
         return failed('4', error_msg)
+    print("if3")
     driver.delete_all_cookies()
 
     # email error
@@ -123,6 +126,7 @@ def test_4(ip, group_id, driver):
     source_3 = driver.page_source
     if user_exists in source_3 or password_mismatch in source_3 or email_exists not in source_3:
         return failed('4', error_msg)
+    print("if4")
     driver.delete_all_cookies()
 
     # password mismatch error
@@ -131,16 +135,20 @@ def test_4(ip, group_id, driver):
     source_4 = driver.page_source
     if user_exists in source_4 or password_mismatch not in source_4 or email_exists in source_4:
         return failed('4', error_msg)
-
+    print("if5")
     ut.login_to_django_admin(group_id=group_id, driver=driver, ip=ip, msg=msg)
     if not ut.check_user_in_django_admin(ip, user_1, driver, msg):
         return failed('4', msg)
+    print("if6")
     if ut.check_user_in_django_admin(ip, user_2, driver, msg):
         return failed('4', msg)
+    print("if7")
     if ut.check_user_in_django_admin(ip, user_3, driver, msg):
         return failed('4', msg)
+    print("if8")
     if ut.check_user_in_django_admin(ip, user_4, driver, msg):
         return failed('4', msg)
+    print("if9")
     return passed('4')
 
 
