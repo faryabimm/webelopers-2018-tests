@@ -157,37 +157,47 @@ def test_4(ip, group_id, driver):
     return passed('4')
 
 
-def test_5(ip, group_id, driver):
-    msg = ''
+def submit_contact_us(ip, group_id, driver, msg):
     if not ut.connect(ip, driver, msg):
-        return failed('5', msg)
+        return None
     if not ut.check_navbar(False, driver, msg):
-        return failed('5', msg)
+        return None
     navbar = ut.find_element_id(driver, "navbar", msg)
     if navbar is None:
-        return failed('5', msg)
+        return None
     contact_us = ut.find_element_id(navbar, "navbar_contact_us", msg)
     if contact_us is None:
-        return failed('5', msg)
+        return None
     contact_us.click()
     title_field = ut.find_element_id(driver, "id_title", msg)
     email_field = ut.find_element_id(driver, "id_email", msg)
     text_field = ut.find_element_id(driver, "id_text", msg)
     submit_button = ut.find_element_id(driver, "signup_submit", msg)
     if title_field is None or email_field is None or text_field is None or submit_button is None:
-        return failed('5', msg)
+        return None
     if title_field.get_attribute("maxlength") != "40":
-        return failed('5', "title field maxlength")
+        msg += "title field maxlength"
+        return None
     if email_field.get_attribute("type") != "email":
-        return failed('5', "email field type")
+        msg += "email field type"
+        return None
     if text_field.get_attribute("minlength") != "10" or text_field.get_attribute("maxlength") != "250":
-        return failed('5', "text field min or max length")
+        msg += "text field min or max length"
+        return None
     message = ContactMessage()
     title_field.send_keys(message.title)
     email_field.send_keys(message.email)
     text_field.send_keys(message.text)
     submit_button.click()
+    return message
+
+
+def test_5(ip, group_id, driver):
+    msg = ''
     # TODO: TOO SLOW AND BLOCKING
+    message = submit_contact_us(ip, group_id, driver, msg)
+    if message is None:
+        return failed('5', msg)
     submitted = WebDriverWait(driver, 10).until(
         EC.text_to_be_present_in_element((By.XPATH, "//*"), "درخواست شما ثبت شد"))
     if submitted is None:
@@ -195,8 +205,35 @@ def test_5(ip, group_id, driver):
     return passed('5')
 
 
-def test_6(ip, gruop_id, driver):
-    return False, 'PASS', 'PASS'
+def test_6(ip, group_id, driver):
+    msg = ''
+    message = submit_contact_us(ip, group_id, driver, msg)
+    if message is None:
+        return failed('6', msg)
+    if not ut.connect("https://www.fastmail.com/login/", driver, msg):
+        return failed('6', msg)
+    WebDriverWait(driver, 10).until(
+        EC.text_to_be_present_in_element((By.XPATH, "//*"), "Log In"))
+    username_field = ut.find_element_name(driver, "username", msg)
+    password_field = ut.find_element_name(driver, "password", msg)
+    login_button = ut.find_css_selector_element(driver, "button", msg)
+    if username_field is None or password_field is None or login_button is None:
+        return failed('6', msg)
+    username_field.send_keys("ostadju@fastmail.com")
+    password_field.send_keys("thegreatramz")
+    login_button.click()
+    WebDriverWait(driver, 5).until(
+        EC.text_to_be_present_in_element((By.XPATH, "//*"), "No Conversation Selected"))
+    title_link = ut.find_css_selector_element(driver, "div[title={}]".format(message.title), msg)
+    if title_link is None:
+        return failed('6', msg)
+    title_link.click()
+    WebDriverWait(driver, 5).until(
+        EC.text_to_be_present_in_element((By.XPATH, "//*"), "Reply"))
+    source = driver.page_source
+    if message.text not in source or message.email not in source:
+        return failed('6', "contact us message hasn't sent correctly")
+    return passed('6')
 
 
 def test_7(ip, group_id, driver):
