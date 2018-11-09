@@ -222,28 +222,70 @@ def test_7(ip, group_id, driver):
     return passed('7')
 
 
-def test_8(ip, group_id, driver):
-    msg = ''
+def create_user_goto_profile(ip, group_id, driver, msg):
     if not ut.connect(ip, driver, msg):
-        return failed('8', msg)
+        return None
     if not ut.check_navbar(False, driver, msg):
-        return failed('8', msg)
+        return None
     navbar = ut.find_element_id(driver, "navbar", msg)
     if navbar is None:
-        return failed('8', msg)
+        return None
     profile = ut.find_element_id(navbar, "navbar_profile", msg)
     if profile is not None:
-        return failed('8', "profile link on navbar before login")
+        msg += "profile link on navbar before login"
+        return None
     user_1 = User()
     if not user_1.signup(driver, msg):
-        return failed('8', msg)
+        return None
     if not user_1.login(driver, msg):
-        return failed('8', msg)
+        return None
     profile = ut.find_element_id(navbar, "navbar_profile", msg)
     if profile is None:
-        return failed('8', msg)
+        return None
     profile.click()
+    return user_1
+
+
+def test_8(ip, group_id, driver):
+    msg = ''
+    user_1 = create_user_goto_profile(ip, group_id, driver, msg)
+    if user_1 is None:
+        return failed('8', msg)
     source = driver.page_source
     if user_1.first_name not in source or user_1.last_name not in source or user_1.username not in source:
         return failed('8', "incorrect or wrong user profile information")
     return passed('8')
+
+
+def test_9(ip, group_id, driver):
+    msg = ''
+    user_1 = create_user_goto_profile(ip, group_id, driver, msg)
+    if user_1 is None:
+        return failed('9', msg)
+    edit_profile = ut.find_element_id(driver, "edit_profile", msg)
+    if edit_profile is None:
+        return failed('9', msg)
+    edit_profile.click()
+    first_name = ut.find_element_id(driver, "id_first_name", msg)
+    last_name = ut.find_element_id(driver, "id_last_name", msg)
+    submit_button = ut.find_css_selector_element(driver, "input[type=submit]", msg)
+    if first_name is None or last_name is None or submit_button is None:
+        return failed('9', msg)
+    first_name_salt = ut.random_string(5)
+    last_name_salt = ut.random_string(5)
+    first_name.send_keys(first_name_salt)
+    last_name.send_keys(last_name_salt)
+    submit_button.click()
+    # TODO: WAITING FOR SITE TO ADD REDIRECT TO PROFILE PAGE
+    return passed('9')
+
+
+def test_10(ip, group_id, driver):
+    msg = ''
+    user_1 = create_user_goto_profile(ip, group_id, driver, msg)
+    if user_1 is None:
+        return failed('10', msg)
+    edit_profile = ut.find_element_id(driver, "edit_profile", msg)
+    if edit_profile is None:
+        return failed('9', msg)
+    edit_profile.click()
