@@ -10,6 +10,7 @@ import tests
 from flask import Flask, request, Response
 from selenium import webdriver
 from timeout_decorator import timeout, TimeoutError
+from pyvirtualdisplay import Display
 
 import utils
 
@@ -145,9 +146,9 @@ def runserver(port=config.PORT):
 
 if __name__ == '__main__':
     # print(run_test(tests.test_7, None))
-
+    display = Display(visible=0, size=(800, 600))
+    display.start()
     utils.load_admins("admins.json")
-
     if len(sys.argv) > 1:
         server_port = int(sys.argv[1])
         logger.log_info('starting server on custom port', server_port)
