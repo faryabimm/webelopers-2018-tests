@@ -1,5 +1,10 @@
 import utils as ut
 from User import User
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+from ContactMessage import ContactMessage
 
 
 def failed(test, message):
@@ -153,10 +158,45 @@ def test_4(ip, group_id, driver):
 
 
 def test_5(ip, group_id, driver):
-    return False, 'PASS', 'PASS'
+    msg = ''
+    if not ut.connect(ip, driver, msg):
+        return failed('5', msg)
+    if not ut.check_navbar(False, driver, msg):
+        return failed('5', msg)
+    navbar = ut.find_element_id(driver, "navbar", msg)
+    if navbar is None:
+        return failed('5', msg)
+    contact_us = ut.find_element_id(navbar, "navbar_contact_us", msg)
+    if contact_us is None:
+        return failed('5', msg)
+    contact_us.click()
+    title_field = ut.find_element_id(driver, "id_title", msg)
+    email_field = ut.find_element_id(driver, "id_email", msg)
+    text_field = ut.find_element_id(driver, "id_text", msg)
+    submit_button = ut.find_element_id(driver, "signup_submit", msg)
+    if title_field is None or email_field is None or text_field is None or submit_button is None:
+        return failed('5', msg)
+    if title_field.get_attribute("maxlength") != "40":
+        return failed('5', "title field maxlength")
+    if email_field.get_attribute("type") != "email":
+        return failed('5', "email field type")
+    if text_field.get_attribute("minlength") != "10" or text_field.get_attribute("maxlength") != "250":
+        return failed('5', "text field min or max length")
+    message = ContactMessage()
+    title_field.send_keys(message.title)
+    email_field.send_keys(message.email)
+    text_field.send_keys(message.text)
+    submit_button.click()
+    # TODO: TOO SLOW AND BLOCKING
+    submitted = WebDriverWait(driver, 10).until(
+        EC.text_to_be_present_in_element((By.XPATH, "//*"), "درخواست شما ثبت شد"))
+    if submitted is None:
+        return failed('5', "sending email took too long time")
+    return passed('5')
 
 
 def test_6(ip, gruop_id, driver):
+
     return False, 'PASS', 'PASS'
 
 
