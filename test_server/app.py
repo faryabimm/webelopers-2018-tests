@@ -7,7 +7,7 @@ import configuration as config
 import logger
 import requests
 import tests
-from flask import Flask, request, Response
+from flask import Flask, request
 from timeout_decorator import timeout, TimeoutError
 
 app = Flask(__name__)
@@ -46,7 +46,7 @@ def handle_request():
     request_data = request.form
     if 'ip' not in request_data or 'group_id' not in request_data:
         logger.log_error('malformed post request data.')
-        return Response('malformed post request data.')
+        return 'malformed post request data.', 400
 
     group_id = request_data['group_id']
 
@@ -63,7 +63,7 @@ def handle_request():
         return "success - test initiated"
     else:
         logger.log_error('another test for group_id', group_id, 'is in progress')
-        return "error - existing test in progress"
+        return "error - existing test in progress", 406
 
 
 def worker_run_tests(ip, test_order):
