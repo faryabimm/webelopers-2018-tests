@@ -300,7 +300,6 @@ def test_8(ip, group_id, driver):
 def test_9(ip, group_id, driver):
     msg = ''
     user_1 = create_user_goto_profile(ip, group_id, driver, msg)
-    print(user_1.__dict__)
     if user_1 is None:
         return failed('9', msg)
     edit_profile = ut.find_element_id(driver, "edit_profile", msg)
@@ -317,13 +316,13 @@ def test_9(ip, group_id, driver):
     field_first_name.send_keys(first_name_salt)
     field_last_name.send_keys(last_name_salt)
     submit_button.click()
-    edited_first_name = ut.find_element_id(driver, "text_firstname", msg)
-    edited_last_name = ut.find_element_id(driver, "text_lastname", msg)
-    if edited_first_name is None or edited_last_name is None:
+    field_first_name = ut.find_element_id(driver, "text_firstname", msg)
+    field_last_name = ut.find_element_id(driver, "text_lastname", msg)
+    if field_first_name is None or field_last_name is None:
         return failed('9', msg)
-    print("{} {} {}", edited_first_name.text, user_1.first_name, first_name_salt)
-    if edited_first_name.text != user_1.first_name + first_name_salt \
-            or edited_last_name.text != user_1.last_name + last_name_salt:
+    edited_first_name = user_1.first_name + first_name_salt
+    edited_last_name = user_1.last_name + last_name_salt
+    if edited_first_name not in field_first_name.text or edited_last_name not in field_last_name.text:
         return failed('9', "data hasn't edited properly")
     return passed('9')
 

@@ -1,24 +1,12 @@
-import requests
-import tests
-
-driver = selenium.webdriver.Chrome()
-print(tests.test_9("http://0.0.0.0:8000", "1", driver))
 import datetime
-import utils as ut
-
+import tests
 from selenium import webdriver
 
 print(datetime.datetime.now().time())
 options = webdriver.ChromeOptions()
 #options.add_argument('headless')
 driver = webdriver.Chrome(chrome_options=options)
-print(tests.test_13("http://127.0.0.1:8000", "2", driver))
-driver.close()
-
-
-
-# print(ut.random_string_not_contains(10, 'a'))
-
+print(tests.test_9("http://127.0.0.1:8000", "1", driver))
 print(datetime.datetime.now().time())
 
 #requests.post("http://0.0.0.0:6543",
