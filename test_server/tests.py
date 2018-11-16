@@ -276,6 +276,7 @@ def create_user_goto_profile(ip, group_id, driver, msg):
         return None
     if not user_1.login(driver, msg):
         return None
+    navbar = ut.find_element_id(driver, "navbar", msg)
     profile = ut.find_element_id(navbar, "navbar_profile", msg)
     if profile is None:
         return None
@@ -290,30 +291,38 @@ def test_8(ip, group_id, driver):
         return failed('8', msg)
     source = driver.page_source
     if user_1.first_name not in source or user_1.last_name not in source or user_1.username not in source:
-        return failed('8', "incorrect or wrong user profile information")
+        return failed('8', "incorrect user profile information")
     return passed('8')
 
 
 def test_9(ip, group_id, driver):
     msg = ''
     user_1 = create_user_goto_profile(ip, group_id, driver, msg)
+    print(user_1.__dict__)
     if user_1 is None:
         return failed('9', msg)
     edit_profile = ut.find_element_id(driver, "edit_profile", msg)
     if edit_profile is None:
         return failed('9', msg)
     edit_profile.click()
-    first_name = ut.find_element_id(driver, "id_first_name", msg)
-    last_name = ut.find_element_id(driver, "id_last_name", msg)
+    field_first_name = ut.find_element_id(driver, "id_first_name", msg)
+    field_last_name = ut.find_element_id(driver, "id_last_name", msg)
     submit_button = ut.find_css_selector_element(driver, "input[type=submit]", msg)
-    if first_name is None or last_name is None or submit_button is None:
+    if field_first_name is None or field_last_name is None or submit_button is None:
         return failed('9', msg)
     first_name_salt = ut.random_string(5)
     last_name_salt = ut.random_string(5)
-    first_name.send_keys(first_name_salt)
-    last_name.send_keys(last_name_salt)
+    field_first_name.send_keys(first_name_salt)
+    field_last_name.send_keys(last_name_salt)
     submit_button.click()
-    # TODO: WAITING FOR SITE TO ADD REDIRECT TO PROFILE PAGE
+    edited_first_name = ut.find_element_id(driver, "text_firstname", msg)
+    edited_last_name = ut.find_element_id(driver, "text_lastname", msg)
+    if edited_first_name is None or edited_last_name is None:
+        return failed('9', msg)
+    print("{} {} {}", edited_first_name.text, user_1.first_name, first_name_salt)
+    if edited_first_name.text != user_1.first_name + first_name_salt \
+            or edited_last_name.text != user_1.last_name + last_name_salt:
+        return failed('9', "data hasn't edited properly")
     return passed('9')
 
 
