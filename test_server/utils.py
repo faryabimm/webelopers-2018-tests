@@ -76,6 +76,19 @@ def random_string(length):
     return ''.join(random.choice(letters) for i in range(length))
 
 
+def random_string_contains(length, str1):
+    max_offset = length - len(str1)
+    offset = random.randint(0, max_offset)
+    return random_string(offset) + str1 + random_string(length - offset - len(str1))
+
+
+def random_string_not_contains(length, str1):
+    while True:
+        str2 = random_string(length)
+        if str1 not in str2:
+            return str2
+
+
 def random_email():
     return "{}@{}.{}".format(random_string(random.randint(5, 9)),
                              random_string(random.randint(4, 7)),

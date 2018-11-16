@@ -2,6 +2,7 @@ import requests
 import tests
 
 import datetime
+import utils as ut
 
 from selenium import webdriver
 
@@ -9,8 +10,12 @@ print(datetime.datetime.now().time())
 options = webdriver.ChromeOptions()
 #options.add_argument('headless')
 driver = webdriver.Chrome(chrome_options=options)
-print(tests.test_23("http://127.0.0.1:8000", "2", driver))
+print(tests.test_13("http://127.0.0.1:8000", "2", driver))
 driver.close()
+
+
+
+# print(ut.random_string_not_contains(10, 'a'))
 
 print(datetime.datetime.now().time())
 
