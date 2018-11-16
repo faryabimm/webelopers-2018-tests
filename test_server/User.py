@@ -1,15 +1,17 @@
 import utils as ut
+import random
 
 
 class User:
-    def __init__(self):
+    def __init__(self, valid_is_students=[True]):
         self.first_name = ut.random_string(10)
         self.last_name = ut.random_string(10)
         self.username = ut.random_string(10)
         self.email = ut.random_email()
         self.password = ut.random_string(10)
+        self.is_student = random.choice(valid_is_students)
 
-    def signup(self, driver, msg, send_mismatched_password=False):
+    def signup(self, driver, msg, send_mismatched_password=False, send_type=False):
         ut.find_element_id(driver, "navbar_signup", msg).click()
         id_first_name = ut.find_element_id(driver, "id_first_name", msg)
         id_last_name = ut.find_element_id(driver, "id_last_name", msg)
@@ -17,9 +19,14 @@ class User:
         id_email = ut.find_element_id(driver, "id_email", msg)
         id_password1 = ut.find_element_id(driver, "id_password1", msg)
         id_password2 = ut.find_element_id(driver, "id_password2", msg)
+        id_type_student = ut.find_element_id(driver, "id_type_0", msg)
+        id_type_teacher = ut.find_element_id(driver, "id_type_1", msg)
         if id_first_name is None or id_last_name is None or id_username is None \
                 or id_email is None or id_password1 is None or id_password2 is None:
             return False
+        if send_type:
+            if id_type_teacher is None or id_type_student is None:
+                return False
         id_first_name.send_keys(self.first_name)
         id_last_name.send_keys(self.last_name)
         id_username.send_keys(self.username)
@@ -29,6 +36,11 @@ class User:
             id_password2.send_keys(self.password + ut.random_string(10))
         else:
             id_password2.send_keys(self.password)
+        if send_type:
+            if self.is_student:
+                id_type_student.click()
+            else:
+                id_type_teacher.click()
         signup_submit = ut.find_element_id(driver, "signup_submit", msg)
         if signup_submit is None:
             return False

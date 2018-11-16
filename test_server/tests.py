@@ -317,12 +317,18 @@ def test_9(ip, group_id, driver):
     return passed('9')
 
 
-def test_10(ip, group_id, driver):
+def test_23(ip, group_id, driver):
     msg = ''
-    user_1 = create_user_goto_profile(ip, group_id, driver, msg)
-    if user_1 is None:
-        return failed('10', msg)
-    edit_profile = ut.find_element_id(driver, "edit_profile", msg)
-    if edit_profile is None:
-        return failed('9', msg)
-    edit_profile.click()
+    user = User([True, False])
+    if not ut.connect(ip, driver, msg):
+        return failed('23', msg)
+    if not ut.check_navbar(False, driver, msg):
+        return failed('23', msg)
+    home_url = driver.current_url
+    home_source = driver.page_source
+    if not user.signup(driver, msg, send_type=True):
+        return failed('23', msg)
+    if driver.current_url != home_url or driver.page_source != home_source:
+        return failed('23', 'redirect to home after signup failed')
+
+    return passed('23')
