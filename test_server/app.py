@@ -49,9 +49,10 @@ def handle_request():
     request_data = request.form
     if 'ip' not in request_data or 'group_id' not in request_data:
         logger.log_error('malformed post request data.')
-        return Response('malformed post request data.')
+        return 'malformed post request data.', 400
 
     group_id = request_data['group_id']
+
     if test_and_set_active(group_id):
         logger.log_info('lock acquired for group_id', group_id)
         ip = request_data['ip']
@@ -65,7 +66,7 @@ def handle_request():
         return "success - test initiated"
     else:
         logger.log_error('another test for group_id', group_id, 'is in progress')
-        return "error - existing test in progress"
+        return "error - existing test in progress", 406
 
 
 def worker_run_tests(ip, test_order, group_id):
@@ -78,7 +79,7 @@ def worker_run_tests(ip, test_order, group_id):
             try:
                 options = webdriver.ChromeOptions()
                 options.add_argument('headless')
-                driver = webdriver.Chrome()
+                driver = webdriver.Chrome(chrome_options=options)
                 test_result, string_output, stack_trace = run_test(test_function, ip, group_id, driver)
                 driver.delete_all_cookies()
                 driver.close()
@@ -97,7 +98,7 @@ def worker_run_tests(ip, test_order, group_id):
                 try:
                     options = webdriver.ChromeOptions()
                     options.add_argument('headless')
-                    driver = webdriver.Chrome()
+                    driver = webdriver.Chrome(chrome_options=options)
                     test_result, string_output, stack_trace = run_test(test_function, ip, group_id, driver)
                     driver.delete_all_cookies()
                     driver.close()
@@ -145,9 +146,9 @@ def runserver(port=config.PORT):
 
 if __name__ == '__main__':
     # print(run_test(tests.test_7, None))
-
+    # display = Display(visible=0, size=(800, 600))
+    # display.start()
     utils.load_admins("admins.json")
-
     if len(sys.argv) > 1:
         server_port = int(sys.argv[1])
         logger.log_info('starting server on custom port', server_port)

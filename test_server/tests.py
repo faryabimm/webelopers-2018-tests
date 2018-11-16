@@ -6,6 +6,8 @@ from selenium.webdriver.support import expected_conditions as EC
 
 from ContactMessage import ContactMessage
 
+import random
+
 
 def failed(test, message):
     return False, 'TEST {}: {}'.format(test, message)
@@ -326,12 +328,94 @@ def test_9(ip, group_id, driver):
     return passed('9')
 
 
-def test_10(ip, group_id, driver):
+def test_13(ip, group_id, driver):
     msg = ''
-    user_1 = create_user_goto_profile(ip, group_id, driver, msg)
-    if user_1 is None:
-        return failed('10', msg)
-    edit_profile = ut.find_element_id(driver, "edit_profile", msg)
-    if edit_profile is None:
-        return failed('9', msg)
-    edit_profile.click()
+    if not ut.connect(ip, driver, msg):
+        return failed('13', msg)
+    if not ut.check_navbar(False, driver, msg):
+        return failed('13', msg)
+
+    query = ut.random_string(random.randint(3, 7))
+    print(query)
+    correct_list = []
+    wrong_list = []
+
+    for i in range(20):
+        user = User([True, False])
+        state = random.randint(0, 3)
+        if state == 0:
+            user.username = ut.random_string_contains(10, query)
+            user.first_name = ut.random_string_not_contains(10, query)
+            user.last_name = ut.random_string_not_contains(10, query)
+        if state == 1:
+            user.username = ut.random_string_not_contains(10, query)
+            user.first_name = ut.random_string_contains(10, query)
+            user.last_name = ut.random_string_not_contains(10, query)
+        if state == 2:
+            user.username = ut.random_string_not_contains(10, query)
+            user.first_name = ut.random_string_not_contains(10, query)
+            user.last_name = ut.random_string_contains(10, query)
+        if state == 3:
+            user.username = ut.random_string_not_contains(10, query)
+            user.first_name = ut.random_string_not_contains(10, query)
+            user.last_name = ut.random_string_not_contains(10, query)
+        if user.is_student:
+            wrong_list.append(user)
+        elif state == 3:
+            wrong_list.append(user)
+        else:
+            correct_list.append(user)
+        if not user.signup(driver, msg, send_type=True):
+            return failed('13', msg)
+    search_box = ut.find_css_selector_element(driver, 'input#search_profiles', msg)
+    search_button = ut.find_css_selector_element(driver, 'button#search_profiles', msg)
+    if search_box is None or search_button is None:
+        return failed('13', msg)
+    search_box.send_keys(query)
+    search_button.click()
+
+    found = {}
+
+    i = 0
+    while True:
+        username = ut.find_element_id(driver, 'teacher' + str(i) + '-username', msg)
+        first_name = ut.find_element_id(driver, 'teacher' + str(i) + '-first_name', msg)
+        last_name = ut.find_element_id(driver, 'teacher' + str(i) + '-last_name', msg)
+        if username is None or first_name is None or last_name is None:
+            break
+        username = username.text.strip()
+        first_name = first_name.text.strip()
+        last_name = last_name.text.strip()
+        found[username] = (first_name, last_name)
+        i += 1
+
+    for user in correct_list:
+        if user.username not in found:
+            return failed('13', msg)
+        if found[user.username][0] != user.first_name:
+            return failed('13', msg)
+        if found[user.username][1] != user.last_name:
+            return failed('13', msg)
+
+    for user in wrong_list:
+        if user.username in found:
+            return failed('13', msg)
+
+    return passed('13')
+
+
+def test_23(ip, group_id, driver):
+    msg = ''
+    user = User([True, False])
+    if not ut.connect(ip, driver, msg):
+        return failed('23', msg)
+    if not ut.check_navbar(False, driver, msg):
+        return failed('23', msg)
+    home_url = driver.current_url
+    home_source = driver.page_source
+    if not user.signup(driver, msg, send_type=True):
+        return failed('23', msg)
+    if driver.current_url != home_url or driver.page_source != home_source:
+        return failed('23', 'redirect to home after signup failed')
+
+    return passed('23')
