@@ -1,6 +1,7 @@
 import json
 import random
 import string
+import time
 
 
 def connect(ip, driver, msg):
@@ -89,6 +90,18 @@ def random_string_not_contains(length, str1):
             return str2
 
 
+def random_date_time(start="1/1/2008 1:30 PM", end="1/1/2009 1:30 PM"):
+    format = '%m/%d/%Y %I:%M %p'
+    stime = time.mktime(time.strptime(start, format))
+    etime = time.mktime(time.strptime(end, format))
+
+    return time.localtime(stime + random.random() * (etime - stime))
+
+
+def random_time_gt(time1):
+    return random_date_time(start=time.strftime('1/1/2008 %I:%M %p', time1), end="1/1/2008 11:59 PM")
+
+
 def random_email():
     return "{}@{}.{}".format(random_string(random.randint(5, 9)),
                              random_string(random.randint(4, 7)),
@@ -141,7 +154,7 @@ def login_to_django_admin(group_id, driver, ip, msg):
 
 def check_user_in_django_admin(ip, user, driver, msg):
     # todo: username password to django admin required
-    driver.get(ip + "/admin/people/user/")
+    driver.get(ip + "/admin/people/user/") #todo better if name of app not required
     username_link = None
     for a in driver.find_elements_by_xpath("//a"):
         if a.text == user.username:
@@ -153,5 +166,33 @@ def check_user_in_django_admin(ip, user, driver, msg):
     source = driver.page_source
     if user.first_name not in source or user.last_name not in source or user.email not in source:
         msg += "user information have not been saved correctly"
+        return False
+    return True
+
+
+def check_event_in_django_admin(ip, event, driver, msg):
+    # todo: username password to django admin required
+    driver.get(ip + "/admin/")
+
+    event_link = None
+    for a in driver.find_elements_by_xpath("//a"):
+        if a.text == "Teacher Free Times":
+            event_link = a
+            break
+    if event_link is None:
+        return False
+    event_link.click()
+
+    event_link = None
+    for a in driver.find_elements_by_xpath("//a"):
+        if event.user.username in a.text:
+            event_link = a
+            break
+    if event_link is None:
+        return False
+    event_link.click()
+    source = driver.page_source
+    if event.begin_time not in source or event.end_time not in source or event.date not in source:
+        msg += "event information have not been saved correctly"
         return False
     return True

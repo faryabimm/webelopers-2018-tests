@@ -70,3 +70,10 @@ class User:
             return False
         navbar_logout.click()
         return True
+
+    def go_to_profile(self, driver, msg):
+        navbar_profile = ut.find_element_id(driver, "navbar_profile", msg)
+        if navbar_profile is None:
+            return False
+        navbar_profile.click()
+        return True

@@ -8,13 +8,14 @@ from selenium import webdriver
 
 print(datetime.datetime.now().time())
 options = webdriver.ChromeOptions()
-#options.add_argument('headless')
+# options.add_argument('headless')
 driver = webdriver.Chrome(chrome_options=options)
-print(tests.test_13("http://127.0.0.1:8000", "2", driver))
+print(tests.test_24("http://127.0.0.1:8001", "2", driver))
 driver.close()
 
 
-
+# print(ut.random_date_time())
+# print(type(ut.random_date_time()))
 # print(ut.random_string_not_contains(10, 'a'))
 
 print(datetime.datetime.now().time())
