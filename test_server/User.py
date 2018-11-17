@@ -11,7 +11,7 @@ class User:
         self.password = ut.random_string(10)
         self.is_student = random.choice(valid_is_students)
 
-    def signup(self, driver, msg, send_mismatched_password=False, send_type=False):
+    def signup(self, driver, msg, send_mismatched_password=False, send_type=True):
         ut.find_element_id(driver, "navbar_signup", msg).click()
         id_first_name = ut.find_element_id(driver, "id_first_name", msg)
         id_last_name = ut.find_element_id(driver, "id_last_name", msg)
@@ -24,9 +24,6 @@ class User:
         if id_first_name is None or id_last_name is None or id_username is None \
                 or id_email is None or id_password1 is None or id_password2 is None:
             return False
-        if send_type:
-            if id_type_teacher is None or id_type_student is None:
-                return False
         id_first_name.send_keys(self.first_name)
         id_last_name.send_keys(self.last_name)
         id_username.send_keys(self.username)
@@ -37,6 +34,8 @@ class User:
         else:
             id_password2.send_keys(self.password)
         if send_type:
+            if id_type_teacher is None or id_type_student is None:
+                return False
             if self.is_student:
                 id_type_student.click()
             else:

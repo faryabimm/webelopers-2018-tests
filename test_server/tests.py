@@ -294,7 +294,7 @@ def test_8(ip, group_id, driver):
         return failed('8', msg)
     source = driver.page_source
     if user_1.first_name not in source or user_1.last_name not in source or user_1.username not in source:
-        return failed('8', "incorrect or wrong user profile information")
+        return failed('8', "incorrect user profile information")
     return passed('8')
 
 
@@ -307,18 +307,49 @@ def test_9(ip, group_id, driver):
     if edit_profile is None:
         return failed('9', msg)
     edit_profile.click()
-    first_name = ut.find_element_id(driver, "id_first_name", msg)
-    last_name = ut.find_element_id(driver, "id_last_name", msg)
+    field_first_name = ut.find_element_id(driver, "id_first_name", msg)
+    field_last_name = ut.find_element_id(driver, "id_last_name", msg)
     submit_button = ut.find_css_selector_element(driver, "input[type=submit]", msg)
-    if first_name is None or last_name is None or submit_button is None:
+    if field_first_name is None or field_last_name is None or submit_button is None:
         return failed('9', msg)
     first_name_salt = ut.random_string(5)
     last_name_salt = ut.random_string(5)
-    first_name.send_keys(first_name_salt)
-    last_name.send_keys(last_name_salt)
+    field_first_name.send_keys(first_name_salt)
+    field_last_name.send_keys(last_name_salt)
     submit_button.click()
-    # TODO: WAITING FOR SITE TO ADD REDIRECT TO PROFILE PAGE
+    field_first_name = ut.find_element_id(driver, "text_firstname", msg)
+    field_last_name = ut.find_element_id(driver, "text_lastname", msg)
+    if field_first_name is None or field_last_name is None:
+        return failed('9', msg)
+    edited_first_name = user_1.first_name + first_name_salt
+    edited_last_name = user_1.last_name + last_name_salt
+    if edited_first_name not in field_first_name.text or edited_last_name not in field_last_name.text:
+        return failed('9', "data hasn't edited properly")
     return passed('9')
+
+
+def test_10(ip, group_id, driver):
+    msg = ''
+    user_1 = create_user_goto_profile(ip, group_id, driver, msg)
+    if user_1 is None:
+        return failed('10', msg)
+    edit_profile = ut.find_element_id(driver, "edit_profile", msg)
+    if edit_profile is None:
+        return failed('9', msg)
+    edit_profile.click()
+    bio_field = ut.find_element_id(driver, "id_bio", msg)
+    # FIXME this gender_select heavily depends on site's model and may fail
+    gender_select = ut.find_element_id(driver, "id_gender", msg)
+    submit = ut.find_css_selector_element(driver, "input[type=submit]", msg)
+    if bio_field is None or gender_select is None or submit is None:
+        return failed('10', msg)
+    user_1.bio = ut.random_string(200)
+    bio_field.send_keys(user_1.bio)
+    submit.click()
+    if user_1.bio not in driver.page_source:
+        return failed('10', "user bio has not been saved")
+    # FIXME ignoring gender
+    return True
 
 
 def prepare_search(driver, query, test_num, msg):
