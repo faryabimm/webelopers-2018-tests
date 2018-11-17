@@ -327,6 +327,30 @@ def test_9(ip, group_id, driver):
     return passed('9')
 
 
+def test_10(ip, group_id, driver):
+    msg = ''
+    user_1 = create_user_goto_profile(ip, group_id, driver, msg)
+    if user_1 is None:
+        return failed('10', msg)
+    edit_profile = ut.find_element_id(driver, "edit_profile", msg)
+    if edit_profile is None:
+        return failed('9', msg)
+    edit_profile.click()
+    bio_field = ut.find_element_id(driver, "id_bio", msg)
+    # FIXME this gender_select heavily depends on site's model and may fail
+    gender_select = ut.find_element_id(driver, "id_gender", msg)
+    submit = ut.find_css_selector_element(driver, "input[type=submit]", msg)
+    if bio_field is None or gender_select is None or submit is None:
+        return failed('10', msg)
+    user_1.bio = ut.random_string(200)
+    bio_field.send_keys(user_1.bio)
+    submit.click()
+    if user_1.bio not in driver.page_source:
+        return failed('10', "user bio has not been saved")
+    # FIXME ignoring gender
+    return True
+
+
 def test_13(ip, group_id, driver):
     msg = ''
     if not ut.connect(ip, driver, msg):
