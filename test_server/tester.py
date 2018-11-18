@@ -4,7 +4,7 @@ from selenium import webdriver
 
 print(datetime.datetime.now().time())
 options = webdriver.ChromeOptions()
-#options.add_argument('headless')
+#driver_options.add_argument('headless')
 driver = webdriver.Chrome(chrome_options=options)
 print(tests.test_10("http://127.0.0.1:8000", "1", driver))
 print(datetime.datetime.now().time())

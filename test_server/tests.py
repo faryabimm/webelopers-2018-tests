@@ -5,6 +5,7 @@ import urllib.request
 import utils as ut
 from PIL import Image, ImageChops
 from User import User
+from Event import Event
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -12,6 +13,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from ContactMessage import ContactMessage
 
 import random
+import json
 
 
 def failed(test, message):
@@ -283,7 +285,6 @@ def create_user_goto_profile(ip, group_id, driver, msg):
         return None
     if not user_1.login(driver, msg):
         return None
-    navbar = ut.find_element_id(driver, "navbar", msg)
     profile = ut.find_element_id(navbar, "navbar_profile", msg)
     if profile is None:
         return None
@@ -396,15 +397,7 @@ def test_11(ip, group_id, driver):
     return passed('11')
 
 
-def test_13(ip, group_id, driver):
-    msg = ''
-    if not ut.connect(ip, driver, msg):
-        return failed('13', msg)
-    if not ut.check_navbar(False, driver, msg):
-        return failed('13', msg)
-
-    query = ut.random_string(random.randint(3, 7))
-    print(query)
+def prepare_search(driver, query, test_num, msg):
     correct_list = []
     wrong_list = []
 
@@ -434,7 +427,23 @@ def test_13(ip, group_id, driver):
         else:
             correct_list.append(user)
         if not user.signup(driver, msg, send_type=True):
-            return failed('13', msg)
+            return failed(test_num, msg)
+
+    return correct_list, wrong_list
+
+
+def test_13(ip, group_id, driver):
+    msg = ''
+    if not ut.connect(ip, driver, msg):
+        return failed('13', msg)
+    if not ut.check_navbar(False, driver, msg):
+        return failed('13', msg)
+
+    query = ut.random_string(random.randint(3, 7))
+    # print(query)
+
+    correct_list, wrong_list = prepare_search(driver, query, '13', msg)
+
     search_box = ut.find_css_selector_element(driver, 'input#search_profiles', msg)
     search_button = ut.find_css_selector_element(driver, 'button#search_profiles', msg)
     if search_box is None or search_button is None:
@@ -472,18 +481,142 @@ def test_13(ip, group_id, driver):
     return passed('13')
 
 
+def test_14(ip, group_id, driver):
+    msg = ''
+    user = User([False])
+    event = Event(user)
+    if not ut.connect(ip, driver, msg):
+        return failed('14', msg)
+    if not ut.check_navbar(False, driver, msg):
+        return failed('14', msg)
+    # home_url = driver.current_url
+    # home_source = driver.page_source
+    if not user.signup(driver, msg, send_type=True):
+        return failed('14', msg)
+    if not event.create(driver, msg):
+        return failed('14', msg)
+    # if driver.current_url != home_url or driver.page_source != home_source:
+    #     return failed('14', 'redirect to home after creation failed')
+    ut.login_to_django_admin(group_id=group_id, driver=driver, ip=ip, msg=msg)
+    if not ut.check_event_in_django_admin(ip, event, driver, msg):
+        return failed('14', msg)
+    #
+    # TODO check errors
+
+    return passed('14')
+
+
 def test_23(ip, group_id, driver):
     msg = ''
-    user = User([True, False])
-    if not ut.connect(ip, driver, msg):
-        return failed('23', msg)
-    if not ut.check_navbar(False, driver, msg):
-        return failed('23', msg)
-    home_url = driver.current_url
-    home_source = driver.page_source
-    if not user.signup(driver, msg, send_type=True):
-        return failed('23', msg)
-    if driver.current_url != home_url or driver.page_source != home_source:
-        return failed('23', 'redirect to home after signup failed')
+    options = [True, False]
+    for i in range(2):
+        user = User(options)
+        options.remove(user.is_student)
+        if not ut.connect(ip, driver, msg):
+            return failed('23', msg)
+        if not ut.check_navbar(False, driver, msg):
+            return failed('23', msg)
+        home_url = driver.current_url
+        home_source = driver.page_source
+        if not user.signup(driver, msg, send_type=True):
+            return failed('23', msg)
+        if driver.current_url != home_url or driver.page_source != home_source:
+            return failed('23', 'redirect to home after signup failed')
+        if not user.login(driver, msg):
+            return failed('23', msg)
+        if not user.go_to_profile(driver, msg):
+            return failed('23', msg)
+        if user.is_student:
+            if 'دانشجو' not in driver.page_source:
+                return failed('23', msg)
+        else:
+            if 'استاد' not in driver.page_source:
+                return failed('23', msg)
+        if not user.logout(driver, msg):
+            return failed('23', msg)
 
     return passed('23')
+
+
+def test_24(ip, group_id, driver):
+    msg = ''
+    if not ut.connect(ip, driver, msg):
+        return failed('24', msg)
+    if not ut.check_navbar(False, driver, msg):
+        return failed('24', msg)
+
+    query = ut.random_string(random.randint(3, 7))
+    # print(query)
+
+    correct_list, wrong_list = prepare_search(driver, query, '24', msg)
+
+    driver.get(ip + '/search_teachers_api/?query=' + query)
+
+    res = json.loads(ut.find_css_selector_element(driver, 'pre', msg).text.strip())
+    found = {}
+
+    driver.get(ip)
+    user = User()
+    if not user.signup(driver, msg, send_type=True):
+        return failed('24', msg)
+    if not user.login(driver, msg):
+        return failed('24', msg)
+
+    for teacher in res:
+        driver.get(ip + teacher['profile_url'])
+        id_first_name = ut.find_element_id(driver, 'text_firstname', msg)
+        id_last_name = ut.find_element_id(driver, 'text_lastname', msg)
+        id_user_name = ut.find_element_id(driver, 'text_username', msg)
+        if id_first_name is None or id_last_name is None or id_user_name is None:
+            return failed('24', msg)
+        if id_first_name.text.strip() != teacher['first_name']:
+            return failed('24', msg)
+        if id_last_name.text.strip() != teacher['last_name']:
+            return failed('24', msg)
+        found[id_user_name.text.strip()] = (teacher['first_name'], teacher['last_name'])
+
+    for user in correct_list:
+        if user.username not in found:
+            return failed('24', msg)
+        if found[user.username][0] != user.first_name:
+            return failed('24', msg)
+        if found[user.username][1] != user.last_name:
+            return failed('24', msg)
+
+    for user in wrong_list:
+        if user.username in found:
+            return failed('24', msg)
+
+    return passed('24')
+
+
+def test_25(ip, group_id, driver):
+    msg = ''
+    if not ut.connect(ip, driver, msg):
+        return failed('25', msg)
+    if not ut.check_navbar(False, driver, msg):
+        return failed('25', msg)
+
+    user = User([False])
+    if not user.signup(driver, msg, send_type=True):
+        return failed('25', msg)
+    if not user.login(driver, msg):
+        return failed('25', msg)
+    search_box = ut.find_css_selector_element(driver, 'input#search_profiles', msg)
+    search_button = ut.find_css_selector_element(driver, 'button#search_profiles', msg)
+    if search_box is None or search_button is None:
+        return failed('25', msg)
+    search_box.send_keys(user.username)
+    search_button.click()
+    username_link = None
+    for a in driver.find_elements_by_xpath("//a"):
+        if a.text == user.username:
+            username_link = a
+            break
+    if username_link is None:
+        return failed('25', msg)
+    username_link.click()
+    source = driver.page_source
+    if user.first_name not in source or user.last_name not in source or user.username not in source:
+        return failed('25', "incorrect or wrong user profile information")
+    return passed('25')
