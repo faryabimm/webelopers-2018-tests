@@ -1,6 +1,6 @@
 import filecmp
 import os
-import urllib
+import urllib.request
 
 import utils as ut
 from PIL import Image, ImageChops
@@ -342,21 +342,27 @@ def test_10(ip, group_id, driver):
         return failed('9', msg)
     edit_profile.click()
     bio_field = ut.find_element_id(driver, "id_bio", msg)
+    # FIXME this gender_select heavily depends on site's model and may fail
     gender_select = ut.find_element_id(driver, "id_gender", msg)
+    gender_option = {}
     gender_option['M'] = ut.find_css_selector_element(driver, "option[value=M]", msg)
     gender_option['F'] = ut.find_css_selector_element(driver, "option[value=F]", msg)
     submit = ut.find_css_selector_element(driver, "input[type=submit]", msg)
-    if bio_field is None or gender_select is None or \
-            gender_option['M'] is None or gender_option['F'] is None or submit is None:
+    if bio_field is None or gender_select is None or submit is None \
+            or gender_option['M'] is None or gender_option['F'] is None:
         return failed('10', msg)
     user_1.bio = ut.random_string(200)
     bio_field.send_keys(user_1.bio)
-    user_1.gender = random.random(['M','F'])
+    user_1.gender = random.choice(['M', 'F'])
     gender_option[user_1.gender].click()
     submit.click()
     if user_1.bio not in driver.page_source:
         return failed('10', "user bio has not been saved")
-    if user_1.gender not in driver.page_source:
+    text_gender = ut.find_element_id(driver, "text_gender", msg)
+    if text_gender is None:
+        return failed('10')
+    gender = {'M': "مرد", 'F': "زن"}
+    if gender[user_1.gender] not in text_gender.text:
         return failed('10', "user gender has not been saved correctly")
     return passed('10')
 
@@ -365,10 +371,10 @@ def test_11(ip, group_id, driver):
     msg = ''
     user_1 = create_user_goto_profile(ip, group_id, driver, msg)
     if user_1 is None:
-        return failed('10', msg)
+        return failed('11', msg)
     edit_profile = ut.find_element_id(driver, "edit_profile", msg)
     if edit_profile is None:
-        return failed('9', msg)
+        return failed('11', msg)
     edit_profile.click()
     pic_upload = ut.find_element_id(driver, "id_picture", msg)
     submit = ut.find_css_selector_element(driver, "input[type=submit]", msg)
@@ -382,12 +388,9 @@ def test_11(ip, group_id, driver):
     if profile_pic is None:
         return failed('11', msg)
     src = profile_pic.get_attribute('src')
-    urllib.urlretrieve(src, "temp.png")
+    urllib.request.urlretrieve(src, "temp.png")
     uploaded = Image.open(os.path.abspath("temp.png"))
-    if not filecmp.cmp(user_1.profile_image, uploaded):
-        return failed('11', "profile image hasn't uploaded correctly")
-
-    pixelsDifference = ImageChops.difference(Image.open('image1.png'), Image.open('image2.png')).convert('L')
+    pixelsDifference = ImageChops.difference(user_1.profile_image, uploaded).convert('L')
     pixelsDifference = pixelsDifference.point(([0] + ([255] * 255)))
     Img = pixelsDifference.convert('RGB')
     return passed('11')
