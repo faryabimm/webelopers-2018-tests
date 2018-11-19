@@ -394,10 +394,13 @@ def test_11(ip, group_id, driver):
     urllib.request.urlretrieve(src, "temp.png")
     img1 = numpy.asarray(Image.open('sour.png'))
     img2 = numpy.asarray(Image.open('temp.png'))
-    if (img1 - img2).all():
+    if numpy.amax(img1 - img2) != 0 or numpy.amin(img1 - img2) != 0:
         return failed('11', 'images are not equal')
     return passed('11')
 
+
+def test_12(ip, group_id, driver):
+    pass    
 
 def prepare_search(driver, query, test_num, msg):
     correct_list = []
