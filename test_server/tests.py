@@ -1,6 +1,7 @@
 import filecmp
 import os
 import urllib.request
+import numpy
 
 import utils as ut
 from PIL import Image, ImageChops
@@ -276,7 +277,7 @@ def create_user_goto_profile(ip, group_id, driver, msg):
     navbar = ut.find_element_id(driver, "navbar", msg)
     if navbar is None:
         return None
-    profile = ut.find_element_id(navbar, "navbar_profile", msg)
+    profile = ut.find_element_id(driver, "navbar_profile", msg)
     if profile is not None:
         msg += "profile link on navbar before login"
         return None
@@ -285,7 +286,7 @@ def create_user_goto_profile(ip, group_id, driver, msg):
         return None
     if not user_1.login(driver, msg):
         return None
-    profile = ut.find_element_id(navbar, "navbar_profile", msg)
+    profile = ut.find_element_id(driver, "navbar_profile", msg)
     if profile is None:
         return None
     profile.click()
@@ -381,19 +382,20 @@ def test_11(ip, group_id, driver):
     submit = ut.find_css_selector_element(driver, "input[type=submit]", msg)
     if pic_upload is None or submit is None:
         return failed('11', msg)
-    path = os.path.abspath("../static/{}.jpeg".format(random.randint(1,3)))
-    pic_upload.send_keys(path)
-    user_1.profile_image = Image.open(path)
+    imarray = numpy.random.rand(100,100,3) * 255
+    im = Image.fromarray(imarray.astype('uint8')).convert('RGBA')
+    im.save('sour.png')
+    path = pic_upload.send_keys(os.path.abspath('sour.png'))
     submit.click()
     profile_pic = ut.find_element_id(driver, "profile_image", msg)
     if profile_pic is None:
         return failed('11', msg)
     src = profile_pic.get_attribute('src')
     urllib.request.urlretrieve(src, "temp.png")
-    uploaded = Image.open(os.path.abspath("temp.png"))
-    pixelsDifference = ImageChops.difference(user_1.profile_image, uploaded).convert('L')
-    pixelsDifference = pixelsDifference.point(([0] + ([255] * 255)))
-    Img = pixelsDifference.convert('RGB')
+    img1 = numpy.asarray(Image.open('sour.png'))
+    img2 = numpy.asarray(Image.open('temp.png'))
+    if (img1 - img2).all():
+        return failed('11', 'images are not equal')
     return passed('11')
 
 
