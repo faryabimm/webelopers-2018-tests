@@ -400,7 +400,54 @@ def test_11(ip, group_id, driver):
 
 
 def test_12(ip, group_id, driver):
-    pass    
+    simple = [["{}\n="],
+                ["# {}"],
+                ["## {}"],
+                ["### {}"],
+                ["#### {}"],
+                ["##### {}"],
+                ["###### {}"],
+                ["`{}`"],
+                ["*_{}__"],
+                ["_{}*"]]
+    lists = [["* {}"],
+                ["1. {}"]]
+    sn = numpy.random.permutation(10)
+    s, text = [], ""
+    for i in range(10):
+        s.append(random.choice(simple))
+        s[i] = simple[sn[i]]
+        s[i].append(ut.random_string(15))
+        text += "\n" + s[i][0].format(s[i][1]) + "\n"
+    ln = numpy.random.permutation(2)
+    for i in range(2):
+        t = "\n{}\n\n".format(ut.random_string(20))
+        for j in range(5):
+            t += lists[ln[i]][0].format(ut.random_string(15)) + "\n"
+        text += t
+    # get text to compiler save te result
+    result = "compiled markdown"
+    
+    msg = ''
+    user_1 = create_user_goto_profile(ip, group_id, driver, msg)
+    if user_1 is None:
+        return failed('12', msg)
+    edit_profile = ut.find_element_id(driver, "edit_profile", msg)
+    if edit_profile is None:
+        return failed('12', msg)
+    edit_profile.click()
+    bio = ut.find_element_id(driver, "id_bio", msg)
+    if bio is None:
+        return failed('12', msg)
+    bio.send_keys(text)
+    submit = ut.find_css_selector_element(driver, "input[type=submit]", msg)
+    if submit is None:
+        return failed('12', msg)
+    submit.click()
+    if result not in driver.page_source:
+        return failed('12', "bio has not been saved correctly")
+    return passed('12')
+       
 
 def prepare_search(driver, query, test_num, msg):
     correct_list = []
