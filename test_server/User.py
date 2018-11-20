@@ -76,3 +76,49 @@ class User:
             return False
         navbar_profile.click()
         return True
+
+    def reserve(self, event, driver, msg):
+        if not ut.search(event.user.username, driver, msg):
+            return False
+
+        id_profile = ut.find_element_id(driver, 'teacher0-username', msg)
+        if id_profile is None:
+            return False
+        id_profile.click()
+
+        i = 0
+        id_reserve = None
+        while True:
+            id_event = ut.find_element_id(driver, 'free-time-' + str(i), msg)
+            if id_event is None:
+                break
+            source = id_event.text
+            if event.date in source and event.begin_time in source and event.end_time in source and str(event.capacity) in source:
+                id_reserve = ut.find_element_id(id_event, 'reserve-free-time', msg)
+                if id_reserve is None:
+                    return False
+                break
+            i += 1
+        if id_reserve is None:
+            return False
+        id_reserve.click()
+        return True
+
+    def anti_reserve(self, event, driver, msg):
+        if not self.go_to_profile(driver, msg):
+            return False
+        i = 0
+        while True:
+            id_res = ut.find_element_id(driver, 'reserved-free-time-' + str(i), msg)
+            if id_res is None:
+                break
+            source = id_res.text
+            if event.user.first_name in source and event.user.last_name in source and event.date in source and event.begin_time in source and event.end_time in source:
+                id_res = ut.find_element_id(driver, 'undo-reserver-free-time', msg)
+                if id_res is None:
+                    return False
+                id_res.click()
+                return True
+            i += 1
+        return False
+

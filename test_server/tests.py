@@ -9,6 +9,8 @@ from ContactMessage import ContactMessage
 
 import random
 import json
+import time
+import datetime
 
 
 def failed(test, message):
@@ -280,7 +282,7 @@ def create_user_goto_profile(ip, group_id, driver, msg):
         return None
     if not user_1.login(driver, msg):
         return None
-    profile = ut.find_element_id(navbar, "navbar_profile", msg)
+    profile = ut.find_element_id(driver, "navbar_profile", msg)
     if profile is None:
         return None
     profile.click()
@@ -399,12 +401,8 @@ def test_13(ip, group_id, driver):
 
     correct_list, wrong_list = prepare_search(driver, query, '13', msg)
 
-    search_box = ut.find_css_selector_element(driver, 'input#search_profiles', msg)
-    search_button = ut.find_css_selector_element(driver, 'button#search_profiles', msg)
-    if search_box is None or search_button is None:
+    if not ut.search(query, driver, msg):
         return failed('13', msg)
-    search_box.send_keys(query)
-    search_button.click()
 
     found = {}
 
@@ -455,10 +453,456 @@ def test_14(ip, group_id, driver):
     ut.login_to_django_admin(group_id=group_id, driver=driver, ip=ip, msg=msg)
     if not ut.check_event_in_django_admin(ip, event, driver, msg):
         return failed('14', msg)
+    driver.get(ip)
+    # if not user.logout(driver, msg):
+    #     return failed('14', msg)
     #
     # TODO check errors
 
+
+
+
+    error_conflict = 'بازه زمانی انتخاب شده با فرصت های قبلی شما اشتراک دارد'
+    error_begin_end = 'زمان شروع باید قبل از زمان پایان فرصت باشد'
+    error_invalid_begin = 'زمان شروع وارد شده معتبر نمی‌باشد'
+    error_invalid_end = 'زمان پایان وارد شده معتبر نمی‌باشد'
+    error_invalid_date = 'تاریخ وارد شده معتبر نمی‌باشد'
+
+    date1 = time.strftime('%Y-%m-%d', ut.random_date_time())
+    date2 = time.strftime('%Y-%m-%d', ut.random_date_time())
+    time1 = ut.random_date_time()
+    time2 = ut.random_time_gt(time1)
+    time3 = ut.random_time_gt(time2)
+    time4 = ut.random_time_gt(time3)
+    time1 = time.strftime('%H:%M:%S', time1)
+    time2 = time.strftime('%H:%M:%S', time2)
+    time3 = time.strftime('%H:%M:%S', time3)
+    time4 = time.strftime('%H:%M:%S', time4)
+    invalid_second = random.randint(61, 80)
+    invalid_hour = random.randint(24, 30)
+    invalid_time1 = time.strftime('%H:%M:', ut.random_date_time()) + str(invalid_second)
+    invalid_time2 = time.strftime('%H:', ut.random_date_time()) + str(invalid_second) + time.strftime(':%S', ut.random_date_time())
+    invalid_time3 = str(invalid_hour) + time.strftime(':%M:%S', ut.random_date_time())
+    invalid_time4 = ut.random_string(8)
+    invalid_day = random.randint(32, 40)
+    invalid_month = random.randint(13, 20)
+    invalid_date1 = time.strftime('%Y-%m-', ut.random_date_time()) + str(invalid_day)
+    invalid_date2 = time.strftime('%Y-', ut.random_date_time()) + str(invalid_month) + time.strftime('-%d', ut.random_date_time())
+    invalid_date3 = ut.random_string(10)
+
+    dates = [date1, date2, invalid_date1, invalid_date2, invalid_date3]
+    times = [time1, time2, time3, time4, invalid_time1, invalid_time2, invalid_time3, invalid_time4]
+    errors = [None, error_conflict, error_begin_end, error_invalid_begin, error_invalid_end, error_invalid_date]
+
+    # print(times)
+    # print(dates)
+    # print(user.username)
+
+    test_cases = [{'d1': 0, 'd2': 0, 'b1': 0, 'e1': 3, 'b2': 1, 'e2': 2, 'a': 1, 'n': True},
+                  {'d1': 0, 'd2': 0, 'b1': 0, 'e1': 2, 'b2': 1, 'e2': 3, 'a': 1, 'n': True},
+                  {'d1': 0, 'd2': 0, 'b1': 1, 'e1': 2, 'b2': 0, 'e2': 3, 'a': 1, 'n': True},
+                  {'d1': 0, 'd2': 0, 'b1': 1, 'e1': 3, 'b2': 0, 'e2': 2, 'a': 1, 'n': True},
+                  {'d1': 0, 'd2': 1, 'b1': 1, 'e1': 3, 'b2': 0, 'e2': 2, 'a': 0, 'n': True},
+                  {'d1': 0, 'd2': 1, 'b1': 1, 'e1': 3, 'b2': 2, 'e2': 0, 'a': 2, 'n': True},
+                  {'d1': 'x', 'd2': 1, 'b2': 4, 'e2': 0, 'a': 3, 'n': False},
+                  {'d1': 'x', 'd2': 1, 'b2': 5, 'e2': 0, 'a': 3, 'n': False},
+                  {'d1': 'x', 'd2': 1, 'b2': 6, 'e2': 0, 'a': 3, 'n': False},
+                  {'d1': 'x', 'd2': 1, 'b2': 7, 'e2': 0, 'a': 3, 'n': False},
+                  {'d1': 'x', 'd2': 1, 'b2': 0, 'e2': 4, 'a': 4, 'n': False},
+                  {'d1': 'x', 'd2': 1, 'b2': 0, 'e2': 5, 'a': 4, 'n': False},
+                  {'d1': 'x', 'd2': 1, 'b2': 0, 'e2': 6, 'a': 4, 'n': False},
+                  {'d1': 'x', 'd2': 1, 'b2': 0, 'e2': 7, 'a': 4, 'n': False},
+                  {'d1': 'x', 'd2': 2, 'b2': 0, 'e2': 1, 'a': 5, 'n': False},
+                  {'d1': 'x', 'd2': 3, 'b2': 0, 'e2': 1, 'a': 5, 'n': False},
+                  {'d1': 'x', 'd2': 4, 'b2': 0, 'e2': 1, 'a': 5, 'n': False}]
+
+    user = None
+    for test in test_cases:
+
+        if test['n']:
+            user = User([False])
+            user.logout(driver, msg)
+            if not user.signup(driver, msg, send_type=True):
+                return failed('14', msg)
+
+        if test['d1'] != 'x':
+            event1 = Event(user)
+            event1.date = dates[test['d1']]
+            event1.begin_time = times[test['b1']]
+            event1.end_time = times[test['e1']]
+            if not event1.create(driver, msg, logout_login=test['n']):
+                return failed('14', msg)
+
+        event2 = Event(user)
+        event2.date = dates[test['d2']]
+        event2.begin_time = times[test['b2']]
+        event2.end_time = times[test['e2']]
+        if not event2.create(driver, msg, logout_login=(test['n'] and test['d1'] == 'x')):
+            return failed('14', msg)
+        if test['a'] != 0:
+            if errors[test['a']] not in driver.page_source:
+                return failed('14', 'wrong error msg')
+        else:
+            for i in range(1, len(errors)):
+                if errors[i] in driver.page_source:
+                    return failed('14', 'wrong error msg')
+        # if not user.logout(driver, msg):
+        #     return failed('14', msg)
+
     return passed('14')
+
+
+def test_15(ip, group_id, driver):
+    msg = ''
+    user1 = User([False])
+    user2 = User([True])
+    event = Event(user1)
+    if not ut.connect(ip, driver, msg):
+        return failed('15', msg)
+    if not ut.check_navbar(False, driver, msg):
+        return failed('15', msg)
+    # home_url = driver.current_url
+    # home_source = driver.page_source
+    if not user1.signup(driver, msg, send_type=True):
+        return failed('15', msg)
+    if not event.create(driver, msg):
+        return failed('15', msg)
+    if not user1.logout(driver, msg):
+        return failed('15', msg)
+    if not user2.signup(driver, msg, send_type=True):
+        return failed('15', msg)
+    if not user2.login(driver, msg):
+        return failed('15', msg)
+
+    search_box = ut.find_css_selector_element(driver, 'search_profiles_input', msg)
+    search_button = ut.find_css_selector_element(driver, 'search_profiles_button', msg)
+    if search_box is None or search_button is None:
+        return failed('15', msg)
+    search_box.send_keys(user1.username)
+    search_button.click()
+    username_link = None
+    for a in driver.find_elements_by_xpath("//a"):
+        if a.text == user1.username:
+            username_link = a
+            break
+    if username_link is None:
+        return failed('15', msg)
+    username_link.click()
+    source = driver.page_source
+    if event.date not in source or event.begin_time not in source or event.end_time not in source:
+        return failed('15', msg)
+    return passed('15')
+
+
+def test_16(ip, group_id, driver):
+    msg = ''
+    user = User([False])
+    event = Event(user)
+    if not ut.connect(ip, driver, msg):
+        return failed('16', msg)
+    if not ut.check_navbar(False, driver, msg):
+        return failed('16', msg)
+    # home_url = driver.current_url
+    # home_source = driver.page_source
+    if not user.signup(driver, msg, send_type=True):
+        return failed('16', msg)
+    if not event.create(driver, msg):
+        return failed('16', msg)
+    event.new()
+    if not event.save(driver, msg, logout_login=False):
+        return failed('16', msg)
+    # if driver.current_url != home_url or driver.page_source != home_source:
+    #     return failed('16', 'redirect to home after creation failed')
+    ut.login_to_django_admin(group_id=group_id, driver=driver, ip=ip, msg=msg)
+    if not ut.check_event_in_django_admin(ip, event, driver, msg):
+        return failed('16', msg)
+    driver.get(ip)
+    # if not user.logout(driver, msg):
+    #     return failed('14', msg)
+    #
+    # TODO check errors
+
+
+
+
+    error_conflict = 'بازه زمانی انتخاب شده با فرصت های قبلی شما اشتراک دارد'
+    error_begin_end = 'زمان شروع باید قبل از زمان پایان فرصت باشد'
+    error_invalid_begin = 'زمان شروع وارد شده معتبر نمی‌باشد'
+    error_invalid_end = 'زمان پایان وارد شده معتبر نمی‌باشد'
+    error_invalid_date = 'تاریخ وارد شده معتبر نمی‌باشد'
+
+    date1 = time.strftime('%Y-%m-%d', ut.random_date_time())
+    date2 = time.strftime('%Y-%m-%d', ut.random_date_time())
+    time1 = ut.random_date_time()
+    time2 = ut.random_time_gt(time1)
+    time3 = ut.random_time_gt(time2)
+    time4 = ut.random_time_gt(time3)
+    time5 = ut.random_time_gt(time4)
+    time6 = ut.random_time_gt(time5)
+    time1 = time.strftime('%H:%M:%S', time1)
+    time2 = time.strftime('%H:%M:%S', time2)
+    time3 = time.strftime('%H:%M:%S', time3)
+    time4 = time.strftime('%H:%M:%S', time4)
+    time5 = time.strftime('%H:%M:%S', time5)
+    time6 = time.strftime('%H:%M:%S', time6)
+    invalid_second = random.randint(61, 80)
+    invalid_hour = random.randint(24, 30)
+    invalid_time1 = time.strftime('%H:%M:', ut.random_date_time()) + str(invalid_second)
+    invalid_time2 = time.strftime('%H:', ut.random_date_time()) + str(invalid_second) + time.strftime(':%S', ut.random_date_time())
+    invalid_time3 = str(invalid_hour) + time.strftime(':%M:%S', ut.random_date_time())
+    invalid_time4 = ut.random_string(8)
+    invalid_day = random.randint(32, 40)
+    invalid_month = random.randint(13, 20)
+    invalid_date1 = time.strftime('%Y-%m-', ut.random_date_time()) + str(invalid_day)
+    invalid_date2 = time.strftime('%Y-', ut.random_date_time()) + str(invalid_month) + time.strftime('-%d', ut.random_date_time())
+    invalid_date3 = ut.random_string(10)
+
+    dates = [date1, date2, invalid_date1, invalid_date2, invalid_date3]
+    times = [time1, time2, time3, time4, invalid_time1, invalid_time2, invalid_time3, invalid_time4, time5, time6]
+    errors = [None, error_conflict, error_begin_end, error_invalid_begin, error_invalid_end, error_invalid_date]
+
+    # print(dates)
+    # print(times)
+    # print(errors)
+
+    test_cases = [{'d1': 0, 'd2': 0, 'b1': 0, 'e1': 3, 'b2': 1, 'e2': 2, 'd3': 0, 'b3': 8, 'e3': 9, 'a': 1, 'n': True},
+                  {'d1': 0, 'd2': 0, 'b1': 0, 'e1': 2, 'b2': 1, 'e2': 3, 'd3': 0, 'b3': 8, 'e3': 9,  'a': 1, 'n': True},
+                  {'d1': 0, 'd2': 0, 'b1': 1, 'e1': 2, 'b2': 0, 'e2': 3, 'd3': 0, 'b3': 8, 'e3': 9,  'a': 1, 'n': True},
+                  {'d1': 0, 'd2': 0, 'b1': 1, 'e1': 3, 'b2': 0, 'e2': 2, 'd3': 0, 'b3': 8, 'e3': 9,  'a': 1, 'n': True},
+                  {'d1': 0, 'd2': 1, 'b1': 1, 'e1': 3, 'b2': 0, 'e2': 2, 'd3': 0, 'b3': 8, 'e3': 9,  'a': 0, 'n': True},
+                  {'d1': 0, 'd2': 1, 'b1': 1, 'e1': 3, 'b2': 2, 'e2': 0, 'd3': 0, 'b3': 8, 'e3': 9,  'a': 2, 'n': True},
+                  {'d1': 'x', 'd2': 1, 'b2': 4, 'e2': 0, 'd3': 'x', 'a': 3, 'n': False},
+                  {'d1': 'x', 'd2': 1, 'b2': 5, 'e2': 0, 'd3': 'x', 'a': 3, 'n': False},
+                  {'d1': 'x', 'd2': 1, 'b2': 6, 'e2': 0, 'd3': 'x', 'a': 3, 'n': False},
+                  {'d1': 'x', 'd2': 1, 'b2': 7, 'e2': 0, 'd3': 'x', 'a': 3, 'n': False},
+                  {'d1': 'x', 'd2': 1, 'b2': 0, 'e2': 4, 'd3': 'x', 'a': 4, 'n': False},
+                  {'d1': 'x', 'd2': 1, 'b2': 0, 'e2': 5, 'd3': 'x', 'a': 4, 'n': False},
+                  {'d1': 'x', 'd2': 1, 'b2': 0, 'e2': 6, 'd3': 'x', 'a': 4, 'n': False},
+                  {'d1': 'x', 'd2': 1, 'b2': 0, 'e2': 7, 'd3': 'x', 'a': 4, 'n': False},
+                  {'d1': 'x', 'd2': 2, 'b2': 0, 'e2': 1, 'd3': 'x', 'a': 5, 'n': False},
+                  {'d1': 'x', 'd2': 3, 'b2': 0, 'e2': 1, 'd3': 'x', 'a': 5, 'n': False},
+                  {'d1': 'x', 'd2': 4, 'b2': 0, 'e2': 1, 'd3': 'x', 'a': 5, 'n': False}]
+
+    user = None
+    for test in test_cases:
+        # print(test)
+
+        if test['n']:
+            user = User([False])
+            user.logout(driver, msg)
+            if not user.signup(driver, msg, send_type=True):
+                return failed('16', msg)
+
+        if test['d1'] != 'x':
+            event1 = Event(user)
+            event1.date = dates[test['d1']]
+            event1.begin_time = times[test['b1']]
+            event1.end_time = times[test['e1']]
+            if not event1.create(driver, msg, logout_login=test['n']):
+                return failed('16', msg)
+
+        if test['d3'] != 'x':
+            event2 = Event(user)
+            event2.date = dates[test['d3']]
+            event2.begin_time = times[test['b3']]
+            event2.end_time = times[test['e3']]
+            if not event2.create(driver, msg, logout_login=(test['n'] and test['d1'] == 'x')):
+                return failed('16', msg)
+
+        event2.new()
+        event2.date = dates[test['d2']]
+        event2.begin_time = times[test['b2']]
+        event2.end_time = times[test['e2']]
+        if not event2.save(driver, msg, logout_login=(test['n'] and test['d1'] == 'x')):
+            return failed('16', msg)
+
+        if test['a'] != 0:
+            if errors[test['a']] not in driver.page_source:
+                # print(test)
+                return failed('16', 'wrong error msg')
+        else:
+            for i in range(1, len(errors)):
+                if errors[i] in driver.page_source:
+                    # print(test)
+                    return failed('16', 'wrong error msg')
+
+        if test['a'] != 0:
+            event2 = event2.old
+        # if not user.logout(driver, msg):
+        #     return failed('14', msg)
+
+    return passed('16')
+
+
+def test_18(ip, group_id, driver):
+    msg = ''
+    if not ut.connect(ip, driver, msg):
+        return failed('18', msg)
+    if not ut.check_navbar(False, driver, msg):
+        return failed('18', msg)
+    user_teacher = User([False])
+    event = Event(user_teacher)
+    event.capacity = random.randint(2, 4)
+    error_full = 'فرصت مورد نظر ظرفیت خالی ندارد'
+    valid = 'فرصت مورد نظر با موفقیت رزرو شد'
+    if not user_teacher.signup(driver, msg, send_type=True):
+        return failed('18', msg)
+    if not event.create(driver, msg):
+        return failed('18', msg)
+    if not user_teacher.logout(driver, msg):
+        return failed('18', msg)
+    for i in range(event.capacity + 1):
+        user_student = User([True])
+        if not user_student.signup(driver, msg, send_type=True):
+            return failed('18', msg)
+        if not user_student.login(driver, msg):
+            return failed('18', msg)
+        if not user_student.reserve(event, driver, msg):
+            return failed('18', msg)
+        if i == event.capacity:
+            if error_full not in driver.page_source:
+                return failed('18', msg)
+
+        #todo maybe replaces with
+        ##################
+        else:
+            ut.login_to_django_admin(group_id=group_id, driver=driver, ip=ip, msg=msg)
+            if not ut.check_reserve_in_django_admin(ip, event, user_student, driver, msg):
+                return failed('18', msg)
+        ##################
+        # else:
+        #     if valid not in driver.page_source:
+        #         return failed('18', msg)
+        ##################
+
+        driver.get(ip)
+        if not user_student.logout(driver, msg):
+            return failed('18', msg)
+    return passed('18')
+
+
+def test_19(ip, group_id, driver):
+    msg = ''
+    if not ut.connect(ip, driver, msg):
+        return failed('19', msg)
+    if not ut.check_navbar(False, driver, msg):
+        return failed('19', msg)
+    cnt = random.randint(2, 4)
+    events = []
+    for i in range(cnt):
+        user_teacher = User([False])
+        event = Event(user_teacher)
+        if not user_teacher.signup(driver, msg, send_type=True):
+            return failed('19', msg)
+        if not event.create(driver, msg):
+            return failed('19', msg)
+        if not user_teacher.logout(driver, msg):
+            return failed('19', msg)
+        events.append(event)
+    user_student = User([True])
+    if not user_student.signup(driver, msg, send_type=True):
+        return failed('19', msg)
+    if not user_student.login(driver, msg):
+        return failed('19', msg)
+    for i in range(cnt):
+        if not user_student.reserve(events[i], driver, msg):
+            return failed('19', msg)
+    if not user_student.go_to_profile(driver, msg):
+        return failed('19', msg)
+    found = []
+    for i in range(cnt):
+        id_res = ut.find_element_id(driver, 'reserved-free-time-' + str(i), msg)
+        if id_res is None:
+            return failed('19', msg)
+        source = id_res.text
+        for event in events:
+            if event.user.first_name in source and event.user.last_name in source and event.date in source and event.begin_time in source and event.end_time in source:
+                found.append(event)
+    if len(found) != len(events):
+        print(found)
+        print(events)
+        return failed('19', msg)
+    return passed('19')
+
+
+def test_20(ip, group_id, driver):
+    msg = ''
+    if not ut.connect(ip, driver, msg):
+        return failed('20', msg)
+    if not ut.check_navbar(False, driver, msg):
+        return failed('20', msg)
+    user_teacher = User([False])
+    event = Event(user_teacher)
+    if not user_teacher.signup(driver, msg, send_type=True):
+        return failed('20', msg)
+    if not event.create(driver, msg):
+        return failed('20', msg)
+    if not user_teacher.logout(driver, msg):
+        return failed('20', msg)
+    user_student = User([True])
+    if not user_student.signup(driver, msg, send_type=True):
+        return failed('20', msg)
+    if not user_student.login(driver, msg):
+        return failed('20', msg)
+    if not user_student.reserve(event, driver, msg):
+        return failed('20', msg)
+    if not user_student.anti_reserve(event, driver, msg):
+        return failed('20', msg)
+    if not user_student.go_to_profile(driver, msg):
+        return failed('20', msg)
+    source = driver.page_source
+    if event.user.first_name in source and \
+            event.user.last_name in source and \
+            event.date in source and event.begin_time in source and event.end_time in source:
+        return failed('20', msg)
+    return passed('20')
+
+
+def test_21(ip, group_id, driver):
+    msg = ''
+    if not ut.connect(ip, driver, msg):
+        return failed('21', msg)
+    if not ut.check_navbar(False, driver, msg):
+        return failed('21', msg)
+    user1 = User([False])
+    user2 = User([False])
+    if not user1.signup(driver, msg, send_type=True):
+        return failed('21', msg)
+    if not user1.login(driver, msg):
+        return failed('21', msg)
+    if not user1.logout(driver, msg):
+        return failed('21', msg)
+    if not user2.signup(driver, msg, send_type=True):
+        return failed('21', msg)
+    if not user2.login(driver, msg):
+        return failed('21', msg)
+    if not user2.logout(driver, msg):
+        return failed('21', msg)
+    id_search = ut.find_element_id(driver, 'search_profiles_input', msg)
+    if id_search is None:
+        return failed('21', msg)
+    id_search.send_keys(user1.username)
+    id_res = ut.find_element_id(driver, 'autocomplete_results', msg)
+    print(datetime.datetime.now().time())
+    print(help(id_res))
+    print(datetime.datetime.now().time())
+    if id_res is None:
+        return failed('21', msg)
+    if user2.first_name in id_res.text and user2.last_name in id_res.text:
+        print(id_res.text)
+        return failed('21', msg)
+    if user1.first_name not in id_res.text or user1.last_name in id_res.text:
+        print(1)
+        print(id_res.text)
+        return failed('21', msg)
+    id_link = ut.find_css_selector_element(id_res, 'a', msg)
+    if id_link is None:
+        return failed('21', msg)
+    id_link.click()
+    source = driver.page_source
+    if user1.first_name not in source or user1.last_name in source:
+        return failed('21', msg)
+    return passed('21')
 
 
 def test_23(ip, group_id, driver):
@@ -477,6 +921,9 @@ def test_23(ip, group_id, driver):
             return failed('23', msg)
         if driver.current_url != home_url or driver.page_source != home_source:
             return failed('23', 'redirect to home after signup failed')
+
+        #todo REMOVE THESE LINES
+        #########################
         if not user.login(driver, msg):
             return failed('23', msg)
         if not user.go_to_profile(driver, msg):
@@ -487,6 +934,8 @@ def test_23(ip, group_id, driver):
         else:
             if 'استاد' not in driver.page_source:
                 return failed('23', msg)
+        #########################
+
         if not user.logout(driver, msg):
             return failed('23', msg)
 
@@ -557,8 +1006,8 @@ def test_25(ip, group_id, driver):
         return failed('25', msg)
     if not user.login(driver, msg):
         return failed('25', msg)
-    search_box = ut.find_css_selector_element(driver, 'input#search_profiles', msg)
-    search_button = ut.find_css_selector_element(driver, 'button#search_profiles', msg)
+    search_box = ut.find_css_selector_element(driver, 'search_profiles_input', msg)
+    search_button = ut.find_css_selector_element(driver, 'search_profiles_button', msg)
     if search_box is None or search_button is None:
         return failed('25', msg)
     search_box.send_keys(user.username)
@@ -575,3 +1024,18 @@ def test_25(ip, group_id, driver):
     if user.first_name not in source or user.last_name not in source or user.username not in source:
         return failed('25', "incorrect or wrong user profile information")
     return passed('25')
+
+
+def test_26(ip, group_id, driver):
+    msg = ''
+    user = create_user_goto_profile(ip, group_id, driver, msg)
+    if user is None:
+        return failed('26', msg)
+    id_remove = ut.find_element_id(driver, 'remove-user', msg)
+    if id_remove is None:
+        return failed('26', msg)
+    ut.login_to_django_admin(group_id=group_id, driver=driver, ip=ip, msg=msg)
+    if ut.check_user_in_django_admin(ip, user, driver, msg):
+        return failed('26', msg)
+    return passed('26')
+
