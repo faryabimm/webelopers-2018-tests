@@ -579,7 +579,7 @@ def test_22(ip, group_id, driver):
         return failed('22', "wrong email entered and there's no error")
     user_1 = User()
     user_1.email = "ostadju@fastmail.com"
-    if not user_1.signup()
+    if not user_1.signup(driver, msg):
         pass
 
 def test_23(ip, group_id, driver):
@@ -699,6 +699,7 @@ def test_25(ip, group_id, driver):
 
 
 def test_26(ip, group_id, driver):
+    msg = ''
     if not ut.connect(ip, driver, msg):
         return failed('26', msg)
     if not ut.check_navbar(False, driver, msg):
@@ -706,8 +707,12 @@ def test_26(ip, group_id, driver):
     user_1 = User()
     if not user_1.signup(driver, msg):
         return failed('26', msg)
+    if not ut.login_to_django_admin(group_id, driver, ip, msg):
+        return failed('26', msg)
     if not ut.check_user_in_django_admin(ip, user_1, driver, msg):
         return failed('26', msg)
+    driver.get(ip)
+    driver.delete_all_cookies()
     driver.get(ip)
     if not user_1.login(driver, msg):
         return failed('26', msg)
@@ -727,6 +732,8 @@ def test_26(ip, group_id, driver):
     if submit is None:
         return failed('26', msg)
     submit.click()
+    if not ut.login_to_django_admin(group_id, driver, ip, msg):
+        return failed('26', msg)
     if ut.check_user_in_django_admin(ip, user_1, driver, msg):
         return failed('26', "user is still here")
     return passed('26')

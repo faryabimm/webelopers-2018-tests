@@ -151,11 +151,19 @@ def login_to_django_admin(group_id, driver, ip, msg):
     find_element_name(driver, "username", msg).send_keys(username)
     find_element_name(driver, "password", msg).send_keys(password)
     find_css_selector_element(driver, "form input[type=submit]", msg).click()
-
+    return True
 
 def check_user_in_django_admin(ip, user, driver, msg):
     # todo: username password to django admin required
-    driver.get(ip + "/admin/people/user/") #todo better if name of app not required
+    driver.get(ip + "/admin/") #todo better if name of app not required
+    users = None
+    for a in driver.find_elements_by_xpath("//a"):
+        if a.text == "Users":
+            users = a
+            break
+    if users is None:
+        return False
+    users.click()
     username_link = None
     for a in driver.find_elements_by_xpath("//a"):
         if a.text == user.username:
