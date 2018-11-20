@@ -2,6 +2,7 @@ import filecmp
 import os
 import urllib.request
 import numpy
+from markdown import markdown
 
 import utils as ut
 from PIL import Image, ImageChops
@@ -425,9 +426,7 @@ def test_12(ip, group_id, driver):
         for j in range(5):
             t += lists[ln[i]][0].format(ut.random_string(15)) + "\n"
         text += t
-    # get text to compiler save te result
-    result = "compiled markdown"
-    
+    result = markdown(text)
     msg = ''
     user_1 = create_user_goto_profile(ip, group_id, driver, msg)
     if user_1 is None:
@@ -671,4 +670,4 @@ def test_25(ip, group_id, driver):
     source = driver.page_source
     if user.first_name not in source or user.last_name not in source or user.username not in source:
         return failed('25', "incorrect or wrong user profile information")
-    return passed('25')
+    return passed('2')

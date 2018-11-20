@@ -13,3 +13,4 @@ timeout-decorator==0.4.0
 urllib3
 Werkzeug==0.14.1
 Pillow
+Markdown
