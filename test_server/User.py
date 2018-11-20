@@ -23,6 +23,7 @@ class User:
         id_type_teacher = ut.find_element_id(driver, "id_type_1", msg)
         if id_first_name is None or id_last_name is None or id_username is None \
                 or id_email is None or id_password1 is None or id_password2 is None:
+            msg.append("cant signup")
             return False
         id_first_name.send_keys(self.first_name)
         id_last_name.send_keys(self.last_name)
@@ -35,6 +36,7 @@ class User:
             id_password2.send_keys(self.password)
         if send_type:
             if id_type_teacher is None or id_type_student is None:
+                msg.append("user type not found")
                 return False
             if self.is_student:
                 id_type_student.click()

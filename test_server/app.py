@@ -7,13 +7,15 @@ import configuration as config
 import logger
 import requests
 import tests
-from flask import Flask, request, Response
+import utils
+from flask import Flask, request
 from selenium import webdriver
 from timeout_decorator import timeout, TimeoutError
 
-import utils
-
 app = Flask(__name__)
+
+driver_options = webdriver.ChromeOptions()
+driver_options.add_argument('headless')
 
 group_status = {}
 
@@ -23,7 +25,8 @@ def test_and_set_active(group_id):
         group_status[group_id] = {
             'test_active': False,
             'test_count': 0,
-            'last_run': None
+            'last_run': None,
+            'driver': webdriver.Chrome(chrome_options=driver_options)
         }
 
     if not group_status[group_id]['test_active']:
@@ -77,12 +80,7 @@ def worker_run_tests(ip, test_order, group_id):
             test_function = getattr(tests, test_name)
 
             try:
-                options = webdriver.ChromeOptions()
-                options.add_argument('headless')
-                driver = webdriver.Chrome(chrome_options=options)
-                test_result, string_output, stack_trace = run_test(test_function, ip, group_id, driver)
-                driver.delete_all_cookies()
-                driver.close()
+                test_result, string_output, stack_trace = run_test(test_function, ip, group_id)
             except TimeoutError:
                 test_result, string_output, stack_trace = False, 'timeout', 'timeout'
 
@@ -99,7 +97,7 @@ def worker_run_tests(ip, test_order, group_id):
                     options = webdriver.ChromeOptions()
                     options.add_argument('headless')
                     driver = webdriver.Chrome(chrome_options=options)
-                    test_result, string_output, stack_trace = run_test(test_function, ip, group_id, driver)
+                    test_result, string_output, stack_trace = run_test(test_function, ip, group_id)
                     driver.delete_all_cookies()
                     driver.close()
                 except TimeoutError:
@@ -133,7 +131,9 @@ def process_request(ip, group_id, test_order):
 
 
 @timeout(config.TEST_TIMEOUT_S, use_signals=False)
-def run_test(test_function, ip, group_id, driver):
+def run_test(test_function, ip, group_id):
+    driver = group_status[group_id]['driver']
+    driver.delete_all_cookies()
     result, string_output = test_function(
         ip, group_id, driver
     )
@@ -148,11 +148,16 @@ if __name__ == '__main__':
     # print(run_test(tests.test_7, None))
     # display = Display(visible=0, size=(800, 600))
     # display.start()
-    utils.load_admins("admins.json")
-    if len(sys.argv) > 1:
-        server_port = int(sys.argv[1])
-        logger.log_info('starting server on custom port', server_port)
-        runserver(server_port)
-    else:
-        logger.log_info('starting server on default port')
-        runserver()
+
+    try:
+        utils.load_admins("admins.json")
+        if len(sys.argv) > 1:
+            server_port = int(sys.argv[1])
+            logger.log_info('starting server on custom port', server_port)
+            runserver(server_port)
+        else:
+            logger.log_info('starting server on default port')
+            runserver()
+    except Exception:
+        for gid in group_status:
+            group_status[gid]['driver'].close()

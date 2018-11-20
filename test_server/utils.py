@@ -9,7 +9,7 @@ def connect(ip, driver, msg):
         driver.get(ip)
         return True
     except:
-        msg += "Connection timed out {}!".format(ip)
+        msg.append("Connection timed out {}!".format(ip))
         return False
 
 
@@ -19,7 +19,7 @@ def find_element_id(look_in, look_for, msg):
     try:
         return look_in.find_element_by_id(look_for)
     except:
-        msg += "{} not found".format(look_for)
+        msg.append("{} not found".format(look_for))
         return None
 
 
@@ -27,7 +27,7 @@ def find_element_class(look_in, look_for, msg):
     try:
         return look_in.find_element_by_class_name(look_for)
     except:
-        msg += "{} not found".format(look_for)
+        msg.append("{} not found".format(look_for))
         return None
 
 
@@ -35,7 +35,7 @@ def find_element_tag(look_in, look_for, msg):
     try:
         return look_in.find_element_by_tag_name(look_for)
     except:
-        msg += "{} not found".format(look_for)
+        msg.append("{} not found".format(look_for))
         return None
 
 
@@ -43,7 +43,7 @@ def find_element_name(look_in, look_for, msg):
     try:
         return look_in.find_element_by_name(look_for)
     except:
-        msg += "{} not found".format(look_for)
+        msg.append("{} not found".format(look_for))
         return None
 
 
@@ -51,7 +51,7 @@ def find_css_selector_element(look_in, css_selector, msg):
     try:
         return look_in.find_element_by_css_selector(css_selector)
     except:
-        msg += "{} not found".format(css_selector)
+        msg.append("{} not found".format(css_selector))
         return None
 
 
@@ -59,7 +59,7 @@ def find_xpath_element(look_in, xpath, msg):
     try:
         return look_in.find_elements_by_xpath(xpath)
     except:
-        msg += "{} not found".format(xpath)
+        msg.append("{} not found".format(xpath))
         return None
 
 
@@ -68,7 +68,7 @@ def fill_field(field, text, msg):
         field.send_keys(text)
         return True
     except:
-        msg += "{} not filled".format(field.get_attribute("id"))
+        msg.append("{} not filled".format(field.get_attribute("id")))
         return False
 
 
@@ -116,16 +116,19 @@ def random_email():
 def check_navbar(logged_in, driver, msg):
     navbar = find_element_id(driver, "navbar", msg)
     if navbar is None:
+        msg.append("navbar is none")
         return False
     navbar_home = find_element_id(navbar, "navbar_home", msg)
     if not logged_in:
         navbar_login = find_element_id(navbar, "navbar_login", msg)
         navbar_signup = find_element_id(navbar, "navbar_signup", msg)
         if navbar_login is None or navbar_signup is None or navbar_home is None:
+            msg.append("navbar links are not complete")
             return False
     else:
         navbar_logout = find_element_id(navbar, "navbar_logout", msg)
         if navbar_home is None or navbar_logout is None:
+            msg.append("navbar links are not complete")
             return False
     return True
 
@@ -155,7 +158,8 @@ def load_admins(json_file):
 def get_admin(group_id):
     admins = load_admins("admins.json")
     if group_id not in admins.keys():
-        raise Exception("\033[91m NO USERNAME AND PASSWORD FOUND FOR GROUP_ID {} \033[0m".format(group_id))
+        return admins["1"]['username'], admins["1"]['password']
+#        raise Exception("\033[91m NO USERNAME AND PASSWORD FOUND FOR GROUP_ID {} \033[0m".format(group_id))
     return admins[group_id]['username'], admins[group_id]['password']
 
 
@@ -165,11 +169,19 @@ def login_to_django_admin(group_id, driver, ip, msg):
     find_element_name(driver, "username", msg).send_keys(username)
     find_element_name(driver, "password", msg).send_keys(password)
     find_css_selector_element(driver, "form input[type=submit]", msg).click()
-
+    return True
 
 def check_user_in_django_admin(ip, user, driver, msg):
     # todo: username password to django admin required
-    driver.get(ip + "/admin/people/user/") #todo better if name of app not required
+    driver.get(ip + "/admin/") #todo better if name of app not required
+    users = None
+    for a in driver.find_elements_by_xpath("//a"):
+        if a.text == "Users":
+            users = a
+            break
+    if users is None:
+        return False
+    users.click()
     username_link = None
     for a in driver.find_elements_by_xpath("//a"):
         if a.text == user.username:
@@ -180,7 +192,7 @@ def check_user_in_django_admin(ip, user, driver, msg):
     username_link.click()
     source = driver.page_source
     if user.first_name not in source or user.last_name not in source or user.email not in source:
-        msg += "user information have not been saved correctly"
+        msg.append("user information have not been saved correctly")
         return False
     return True
 
@@ -208,7 +220,7 @@ def check_event_in_django_admin(ip, event, driver, msg):
     event_link.click()
     source = driver.page_source
     if event.begin_time not in source or event.end_time not in source or event.date not in source:
-        msg += "event information have not been saved correctly"
+        msg.append("event information have not been saved correctly")
         return False
     return True
 
