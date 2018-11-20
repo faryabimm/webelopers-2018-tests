@@ -27,7 +27,7 @@ def passed(test):
 
 
 def test_1(ip, group_id, driver):
-    msg = ''
+    msg = [] 
     if not ut.connect(ip, driver, msg):
         return failed('1', msg)
     if not ut.check_navbar(False, driver, msg):
@@ -46,7 +46,7 @@ def test_1(ip, group_id, driver):
 
 
 def test_2(ip, group_id, driver):
-    msg = ''
+    msg = []
     user = User()
     if not ut.connect(ip, driver, msg):
         return failed('2', msg)
@@ -68,7 +68,7 @@ def test_2(ip, group_id, driver):
 # user assumed to be signed up to the site
 # this test is dependent to test 2 for user signup
 def test_3(ip, group_id, driver):
-    msg = ''
+    msg = []
     if not ut.connect(ip, driver, msg):
         return failed('3', msg)
     if not ut.check_navbar(False, driver, msg):
@@ -103,7 +103,7 @@ def test_3(ip, group_id, driver):
 
 
 def test_4(ip, group_id, driver):
-    msg = ''
+    msg = []
     if not ut.connect(ip, driver, msg):
         return failed('4', msg)
     if not ut.check_navbar(False, driver, msg):
@@ -187,13 +187,13 @@ def submit_contact_us(ip, group_id, driver, msg):
     if title_field is None or email_field is None or text_field is None or submit_button is None:
         return None
     if title_field.get_attribute("maxlength") != "40":
-        msg += "title field maxlength"
+        msg.append("title field maxlength")
         return None
     if email_field.get_attribute("type") != "email":
-        msg += "email field type"
+        msg.append("email field type")
         return None
     if text_field.get_attribute("minlength") != "10" or text_field.get_attribute("maxlength") != "250":
-        msg += "text field min or max length"
+        msg.append("text field min or max length")
         return None
     message = ContactMessage()
     title_field.send_keys(message.title)
@@ -204,7 +204,7 @@ def submit_contact_us(ip, group_id, driver, msg):
 
 
 def test_5(ip, group_id, driver):
-    msg = ''
+    msg = []
     # TODO: TOO SLOW AND BLOCKING
     message = submit_contact_us(ip, group_id, driver, msg)
     if message is None:
@@ -217,7 +217,7 @@ def test_5(ip, group_id, driver):
 
 
 def test_6(ip, group_id, driver):
-    msg = ''
+    msg = []
     message = submit_contact_us(ip, group_id, driver, msg)
     if message is None:
         return failed('6', msg)
@@ -248,7 +248,7 @@ def test_6(ip, group_id, driver):
 
 
 def test_7(ip, group_id, driver):
-    msg = ''
+    msg = []
     if not ut.connect(ip, driver, msg):
         return failed('7', msg)
     if not ut.check_navbar(False, driver, msg):
@@ -295,7 +295,7 @@ def create_user_goto_profile(ip, group_id, driver, msg):
 
 
 def test_8(ip, group_id, driver):
-    msg = ''
+    msg = []
     user_1 = create_user_goto_profile(ip, group_id, driver, msg)
     if user_1 is None:
         return failed('8', msg)
@@ -306,7 +306,7 @@ def test_8(ip, group_id, driver):
 
 
 def test_9(ip, group_id, driver):
-    msg = ''
+    msg = []
     user_1 = create_user_goto_profile(ip, group_id, driver, msg)
     if user_1 is None:
         return failed('9', msg)
@@ -336,7 +336,7 @@ def test_9(ip, group_id, driver):
 
 
 def test_10(ip, group_id, driver):
-    msg = ''
+    msg = []
     user_1 = create_user_goto_profile(ip, group_id, driver, msg)
     if user_1 is None:
         return failed('10', msg)
@@ -371,7 +371,7 @@ def test_10(ip, group_id, driver):
 
 
 def test_11(ip, group_id, driver):
-    msg = ''
+    msg = []
     user_1 = create_user_goto_profile(ip, group_id, driver, msg)
     if user_1 is None:
         return failed('11', msg)
@@ -427,7 +427,7 @@ def test_12(ip, group_id, driver):
             t += lists[ln[i]][0].format(ut.random_string(15)) + "\n"
         text += t
     result = markdown(text)
-    msg = ''
+    msg = []
     user_1 = create_user_goto_profile(ip, group_id, driver, msg)
     if user_1 is None:
         return failed('12', msg)
@@ -484,7 +484,7 @@ def prepare_search(driver, query, test_num, msg):
 
 
 def test_13(ip, group_id, driver):
-    msg = ''
+    msg = []
     if not ut.connect(ip, driver, msg):
         return failed('13', msg)
     if not ut.check_navbar(False, driver, msg):
@@ -533,7 +533,7 @@ def test_13(ip, group_id, driver):
 
 
 def test_14(ip, group_id, driver):
-    msg = ''
+    msg = []
     user = User([False])
     event = Event(user)
     if not ut.connect(ip, driver, msg):
@@ -558,11 +558,15 @@ def test_14(ip, group_id, driver):
 
 
 def test_22(ip, group_id, driver):
-    msg = ''
+    msg = []
     if not ut.connect(ip, driver, msg):
         return failed('22', "connection failed")
     if not ut.check_navbar(False, driver, msg):
         return failed('22', msg)
+    login = ut.find_element_id(driver, "navbar_login", msg)
+    if login is None:
+        return failed('22', msg)
+    login.click()
     forget = ut.find_element_id(driver, "forget_password", msg)
     if forget is None:
         return failed('22', msg)
@@ -580,10 +584,48 @@ def test_22(ip, group_id, driver):
     user_1 = User()
     user_1.email = "ostadju@fastmail.com"
     if not user_1.signup(driver, msg):
-        pass
+        return failed('22', msg)
+    login = ut.find_elemnt_id(driver, "navbar_login", msg)
+    if login is None:
+        return failed('22', msg)
+    login.click()
+    forget = ut.find_element_id(driver, "forget_password", msg)
+    if forget is None:
+        return failed('22', msg)
+    forget.click()
+    email_field = ut.find_element_id(driver, "id_email", msg)
+    if email_field is None:
+        return failed('22', msg)
+    email_field.send_keys(user_1.email)
+    submit = ut.find_element_id(driver, "submit", msg)
+    if submit is None:
+        return failed('22', msg)
+    submit.click()
+    if "کﺍﺮﺑﺭی ﺏﺍ ﺍیﻡیﻝ ﺩﺍﺪﻫ ﺵﺪﻫ ﻮﺟﻭﺩ ﻥﺩﺍﺭ"in driver.page_source:
+        return failed('22', "correct email entered and there's an error message")
+    if not ut.connect("https://www.fastmail.com/login/", driver, msg):
+        return failed('22', msg)
+    WebDriverWait(driver, 10).until(
+        EC.text_to_be_present_in_element((By.XPATH, "//*"), "Log In"))
+    username_field = ut.find_element_name(driver, "username", msg)
+    password_field = ut.find_element_name(driver, "password", msg)
+    login_button = ut.find_css_selector_element(driver, "button", msg)
+    if username_field is None or passowrd_field is None or login_button is None:
+        return failed('22', msg)
+    username_field.send_keys("ostadju@fastmail.com")
+    password_field.send_keys("thegreatramz")
+    login_button.click()
+    WebDriverWait(driver, 5).until(
+        EC.text_to_be_present_in_element((By.XPATH, "//*"), "No Conversation Selected"))
+    title_link = ut.find_css_selector_element(driver, "div[title={}]".format(user_1.username))
+    if title_link is None:
+        return failed('22', msg)
+    title_link.click()
+    
 
+    
 def test_23(ip, group_id, driver):
-    msg = ''
+    msg = []
     options = [True, False]
     for i in range(2):
         user = User(options)
@@ -615,7 +657,7 @@ def test_23(ip, group_id, driver):
 
 
 def test_24(ip, group_id, driver):
-    msg = ''
+    msg = []
     if not ut.connect(ip, driver, msg):
         return failed('24', msg)
     if not ut.check_navbar(False, driver, msg):
@@ -667,7 +709,7 @@ def test_24(ip, group_id, driver):
 
 
 def test_25(ip, group_id, driver):
-    msg = ''
+    msg = []
     if not ut.connect(ip, driver, msg):
         return failed('25', msg)
     if not ut.check_navbar(False, driver, msg):
@@ -699,7 +741,7 @@ def test_25(ip, group_id, driver):
 
 
 def test_26(ip, group_id, driver):
-    msg = ''
+    msg = []
     if not ut.connect(ip, driver, msg):
         return failed('26', msg)
     if not ut.check_navbar(False, driver, msg):
