@@ -557,6 +557,31 @@ def test_14(ip, group_id, driver):
     return passed('14')
 
 
+def test_22(ip, group_id, driver):
+    msg = ''
+    if not ut.connect(ip, driver, msg):
+        return failed('22', "connection failed")
+    if not ut.check_navbar(False, driver, msg):
+        return failed('22', msg)
+    forget = ut.find_element_id(driver, "forget_password", msg)
+    if forget is None:
+        return failed('22', msg)
+    forget.click()
+    email_field = ut.find_elemnt_id(driver, "id_email", msg)
+    if email_field is None:
+        return failed('22', msg)
+    email_field.send_keys(ut.random_email())
+    submit = ut.find_element_id(driver, "submit", msg)
+    if submit is None:
+        return failed('22', msg)
+    submit.click()
+    if "کاربری با ایمیل داده شده وجود ندار"not in driver.page_source:
+        return failed('22', "wrong email entered and there's no error")
+    user_1 = User()
+    user_1.email = "ostadju@fastmail.com"
+    if not user_1.signup()
+        pass
+
 def test_23(ip, group_id, driver):
     msg = ''
     options = [True, False]
@@ -671,3 +696,37 @@ def test_25(ip, group_id, driver):
     if user.first_name not in source or user.last_name not in source or user.username not in source:
         return failed('25', "incorrect or wrong user profile information")
     return passed('2')
+
+
+def test_26(ip, group_id, driver):
+    if not ut.connect(ip, driver, msg):
+        return failed('26', msg)
+    if not ut.check_navbar(False, driver, msg):
+        return failed('26', msg)
+    user_1 = User()
+    if not user_1.signup(driver, msg):
+        return failed('26', msg)
+    if not ut.check_user_in_django_admin(ip, user_1, driver, msg):
+        return failed('26', msg)
+    driver.get(ip)
+    if not user_1.login(driver, msg):
+        return failed('26', msg)
+    navbar_profile = ut.find_element_id(driver, "navbar_profile", msg)
+    if navbar_profile is None:
+        return failed('26', msg)
+    navbar_profile.click()
+    remove_user = ut.find_element_id(driver, "remove_user", msg)
+    if remove_user is None:
+        return failed('26', msg)
+    remove_user.click()
+    username_field = ut.find_element_id(driver, "id_username", msg)
+    if username_field is None:
+        return failed('26', msg)
+    username_field.send_keys(user_1.username)
+    submit = ut.find_element_id(driver, "remove_user", msg)
+    if submit is None:
+        return failed('26', msg)
+    submit.click()
+    if ut.check_user_in_django_admin(ip, user_1, driver, msg):
+        return failed('26', "user is still here")
+    return passed('26')
