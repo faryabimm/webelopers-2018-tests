@@ -824,6 +824,7 @@ def test_16(ip, group_id, driver):
     error_invalid_begin = 'زمان شروع وارد شده معتبر نمی‌باشد'
     error_invalid_end = 'زمان پایان وارد شده معتبر نمی‌باشد'
     error_invalid_date = 'تاریخ وارد شده معتبر نمی‌باشد'
+    error_capacity = 'ظرفیت جدید کمتر از تعداد رزروها است'
 
     date1 = time.strftime('%Y-%m-%d', ut.random_date_time())
     date2 = time.strftime('%Y-%m-%d', ut.random_date_time())
@@ -853,11 +854,11 @@ def test_16(ip, group_id, driver):
 
     dates = [date1, date2, invalid_date1, invalid_date2, invalid_date3]
     times = [time1, time2, time3, time4, invalid_time1, invalid_time2, invalid_time3, invalid_time4, time5, time6]
-    errors = [None, error_conflict, error_begin_end, error_invalid_begin, error_invalid_end, error_invalid_date]
+    errors = [None, error_conflict, error_begin_end, error_invalid_begin, error_invalid_end, error_invalid_date, error_capacity]
 
-    # print(dates)
-    # print(times)
-    # print(errors)
+    print(dates)
+    print(times)
+    print(errors)
 
     test_cases = [{'d1': 0, 'd2': 0, 'b1': 0, 'e1': 3, 'b2': 1, 'e2': 2, 'd3': 0, 'b3': 8, 'e3': 9, 'a': 1, 'n': True},
                   {'d1': 0, 'd2': 0, 'b1': 0, 'e1': 2, 'b2': 1, 'e2': 3, 'd3': 0, 'b3': 8, 'e3': 9,  'a': 1, 'n': True},
@@ -875,7 +876,8 @@ def test_16(ip, group_id, driver):
                   {'d1': 'x', 'd2': 1, 'b2': 0, 'e2': 7, 'd3': 'x', 'a': 4, 'n': False},
                   {'d1': 'x', 'd2': 2, 'b2': 0, 'e2': 1, 'd3': 'x', 'a': 5, 'n': False},
                   {'d1': 'x', 'd2': 3, 'b2': 0, 'e2': 1, 'd3': 'x', 'a': 5, 'n': False},
-                  {'d1': 'x', 'd2': 4, 'b2': 0, 'e2': 1, 'd3': 'x', 'a': 5, 'n': False}]
+                  {'d1': 'x', 'd2': 4, 'b2': 0, 'e2': 1, 'd3': 'x', 'a': 5, 'n': False},
+                  {'d1': 'x', 'd2': 0, 'b2': 8, 'e2': 9, 'd3': 0, 'b3': 8, 'e3': 9, 'a': 6, 'c3': 5, 'c2': 4, 'n': False}]
 
     user = None
     for test in test_cases:
@@ -900,6 +902,8 @@ def test_16(ip, group_id, driver):
             event2.date = dates[test['d3']]
             event2.begin_time = times[test['b3']]
             event2.end_time = times[test['e3']]
+            if 'c3' in test:
+                event2.capacity = test['c3']
             if not event2.create(driver, msg, logout_login=(test['n'] and test['d1'] == 'x')):
                 return failed('16', msg)
 
@@ -907,12 +911,14 @@ def test_16(ip, group_id, driver):
         event2.date = dates[test['d2']]
         event2.begin_time = times[test['b2']]
         event2.end_time = times[test['e2']]
+        if 'c2' in test:
+            event2.capacity = test['c2']
         if not event2.save(driver, msg, logout_login=(test['n'] and test['d1'] == 'x')):
             return failed('16', msg)
 
         if test['a'] != 0:
             if errors[test['a']] not in driver.page_source:
-                # print(test)
+                print(test)
                 msg.append('wrong error msg')
                 return failed('16', msg)
         else:
