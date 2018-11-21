@@ -10,12 +10,13 @@ import tests
 import utils
 from flask import Flask, request
 from selenium import webdriver
+from selenium.webdriver.firefox.options import Options
 from timeout_decorator import timeout, TimeoutError
 
 app = Flask(__name__)
 
-driver_options = webdriver.ChromeOptions()
-driver_options.add_argument('headless')
+driver_options = Options()
+driver_options.headless = True
 
 group_status = {}
 
@@ -26,7 +27,7 @@ def test_and_set_active(group_id):
             'test_active': False,
             'test_count': 0,
             'last_run': None,
-            'driver': webdriver.Chrome(chrome_options=driver_options)
+            'driver': webdriver.Firefox(options=driver_options)
         }
 
     if not group_status[group_id]['test_active']:
@@ -111,6 +112,7 @@ def worker_run_tests(ip, test_order, group_id):
                     driver = webdriver.Chrome(chrome_options=options)
                     test_result, string_output, stack_trace = run_test(test_function, ip, group_id)
                     driver.delete_all_cookies()
+                    utils.clear_cache(driver)
                     driver.close()
                 except TimeoutError:
                     test_result, string_output, stack_trace = False, 'timeout', 'timeout'
@@ -148,11 +150,18 @@ def process_request(ip, group_id, test_order):
 
 @timeout(config.TEST_TIMEOUT_S, use_signals=False)
 def run_test(test_function, ip, group_id):
+    print(1)
     driver = group_status[group_id]['driver']
+    print(2)
+    # utils.clear_cache(driver)
+    driver.get(ip)
     driver.delete_all_cookies()
+    print(3)
     result, string_output = test_function(
         ip, group_id, driver
     )
+    print(4)
+    print(result, string_output, 'HMM')
     return result, string_output, 'HMM'
 
 
