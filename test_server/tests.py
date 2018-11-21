@@ -1124,7 +1124,8 @@ def test_21(ip, group_id, driver):
     id_res = ut.find_element_id(driver, 'autocomplete_results', msg)
     # print(datetime.datetime.now().time())
     # time.sleep(1)
-    submitted = WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#autocomplete_results a")))
+    # EC.number_of_windows_to_be
+    submitted = WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#autocomplete_results a")))
     if submitted is None:
         return failed('21', msg)
     # print(submitted.text)
