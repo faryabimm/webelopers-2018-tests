@@ -90,8 +90,8 @@ def random_string_not_contains(length, str1):
             return str2
 
 
-def random_date_time(start="1/1/2008 1:30 PM", end="1/1/2009 1:30 PM"):
-    format = '%m/%d/%Y %I:%M %p'
+def random_date_time(start="1/1/2008 1:30:00 PM", end="1/1/2009 1:30:00 PM"):
+    format = '%m/%d/%Y %I:%M:%S %p'
     stime = time.mktime(time.strptime(start, format))
     etime = time.mktime(time.strptime(end, format))
 
@@ -99,7 +99,12 @@ def random_date_time(start="1/1/2008 1:30 PM", end="1/1/2009 1:30 PM"):
 
 
 def random_time_gt(time1):
-    return random_date_time(start=time.strftime('1/1/2008 %I:%M %p', time1), end="1/1/2008 11:59 PM")
+    t = 0
+    while True:
+        t = random_date_time(start=time.strftime('1/1/2008 %I:%M:%S %p', time1), end="1/1/2008 11:59:00 PM")
+        if time.strftime('1/1/2008 %I:%M:%S %p', time1) != time.strftime('1/1/2008 %I:%M:%S %p', t):
+            break
+    return t
 
 
 def random_email():
@@ -125,6 +130,16 @@ def check_navbar(logged_in, driver, msg):
         if navbar_home is None or navbar_logout is None:
             msg.append("navbar links are not complete")
             return False
+    return True
+
+
+def search(query, driver, msg):
+    search_box = find_css_selector_element(driver, 'search_profiles_input', msg)
+    search_button = find_css_selector_element(driver, 'search_profiles_button', msg)
+    if search_box is None or search_button is None:
+        return False
+    search_box.send_keys(query)
+    search_button.click()
     return True
 
 
@@ -206,5 +221,29 @@ def check_event_in_django_admin(ip, event, driver, msg):
     source = driver.page_source
     if event.begin_time not in source or event.end_time not in source or event.date not in source:
         msg.append("event information have not been saved correctly")
+        return False
+    return True
+
+
+def check_reserve_in_django_admin(ip, event, user, driver, msg):
+    # todo: username password to django admin required
+    driver.get(ip + "/admin/")
+
+    event_link = None
+    for a in driver.find_elements_by_xpath("//a"):
+        if a.text == "Reserved Free Times":
+            event_link = a
+            break
+    if event_link is None:
+        return False
+    event_link.click()
+
+    event_link = None
+    for a in driver.find_elements_by_xpath("//a"):
+        if event.user.username in a.text and user.username in a.text and event.date in a.text\
+                and event.begin_time in a.text and event.end_time in a.text:
+            event_link = a
+            break
+    if event_link is None:
         return False
     return True
