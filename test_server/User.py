@@ -12,7 +12,7 @@ class User:
         self.is_student = random.choice(valid_is_students)
 
     def signup(self, driver, msg, send_mismatched_password=False, send_type=True):
-        ut.find_element_id(driver, "navbar_signup", msg).click()
+        ut.find_element_id(driver, "id_navbar_signup", msg).click()
         id_first_name = ut.find_element_id(driver, "id_first_name", msg)
         id_last_name = ut.find_element_id(driver, "id_last_name", msg)
         id_username = ut.find_element_id(driver, "id_username", msg)
@@ -42,14 +42,14 @@ class User:
                 id_type_student.click()
             else:
                 id_type_teacher.click()
-        signup_submit = ut.find_element_id(driver, "signup_submit", msg)
+        signup_submit = ut.find_element_id(driver, "id_submit", msg)
         if signup_submit is None:
             return False
         signup_submit.click()
         return True
 
     def login(self, driver, msg):
-        navbar_login = ut.find_element_id(driver, "navbar_login", msg)
+        navbar_login = ut.find_element_id(driver, "id_navbar_login", msg)
         if navbar_login is None:
             return False
         navbar_login.click()
@@ -59,21 +59,21 @@ class User:
             return False
         id_username.send_keys(self.username)
         id_password.send_keys(self.password)
-        login_submit = ut.find_element_id(driver, "login_submit", msg)
+        login_submit = ut.find_element_id(driver, "id_submit", msg)
         if login_submit is None:
             return False
         login_submit.click()
         return True
 
     def logout(self, driver, msg):
-        navbar_logout = ut.find_element_id(driver, "navbar_logout", msg)
+        navbar_logout = ut.find_element_id(driver, "id_navbar_logout", msg)
         if navbar_logout is None:
             return False
         navbar_logout.click()
         return True
 
     def go_to_profile(self, driver, msg):
-        navbar_profile = ut.find_element_id(driver, "navbar_profile", msg)
+        navbar_profile = ut.find_element_id(driver, "id_navbar_profile", msg)
         if navbar_profile is None:
             return False
         navbar_profile.click()
@@ -116,7 +116,7 @@ class User:
                 break
             source = id_res.text
             if event.user.first_name in source and event.user.last_name in source and event.date in source and event.begin_time in source and event.end_time in source:
-                id_res = ut.find_element_id(driver, 'undo-reserver-free-time', msg)
+                id_res = ut.find_element_id(driver, "cancel_meeting", msg)
                 if id_res is None:
                     return False
                 id_res.click()

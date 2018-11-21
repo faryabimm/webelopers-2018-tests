@@ -35,12 +35,12 @@ def test_1(ip, group_id, driver):
     if not ut.check_navbar(False, driver, msg):
         return failed('1', msg)
 
-    if "به سامانه استادجو خوش آمدید." not in driver.page_source:
+    if "به سامانه استادجو خوش آمدید" not in driver.page_source:
         return failed('1', 'incorrect or not found welcome message')
 
     home_url = driver.current_url
     home_source = driver.page_source
-    ut.find_element_id(driver, "navbar_home", msg).click()
+    ut.find_element_id(driver, "id_navbar_home", msg).click()
     if driver.current_url != home_url or driver.page_source != home_source:
         return failed('1', msg)
 
@@ -114,17 +114,14 @@ def test_4(ip, group_id, driver):
     email_exists = "کاربری با ایمیل وارد شده وجود دارد"
     password_mismatch = "گذرواژه و تکرار گذرواژه یکسان نیستند"
 
-    error_msg = 'wrong errors'
 
     # all correct
     user_1 = User()
     if not user_1.signup(driver, msg):
         return failed('4', msg)
-    print("if1")
     source_1 = driver.page_source
     if user_exists in source_1 or password_mismatch in source_1 or email_exists in source_1:
         return failed('4', error_msg)
-    print("if2")
     driver.delete_all_cookies()
 
     # username error
@@ -133,8 +130,8 @@ def test_4(ip, group_id, driver):
     user_2.signup(driver, msg)
     source_2 = driver.page_source
     if user_exists not in source_2 or password_mismatch in source_2 or email_exists in source_2:
-        return failed('4', error_msg)
-    print("if3")
+        msg.append("wrong error messages shown in signup errors")
+        return failed('4', msg)
     driver.delete_all_cookies()
 
     # email error
@@ -143,8 +140,8 @@ def test_4(ip, group_id, driver):
     user_3.signup(driver, msg)
     source_3 = driver.page_source
     if user_exists in source_3 or password_mismatch in source_3 or email_exists not in source_3:
-        return failed('4', error_msg)
-    print("if4")
+        msg.append("wrong error messages shown in signup errors")
+        return failed('4', msg)
     driver.delete_all_cookies()
 
     # password mismatch error
@@ -152,21 +149,16 @@ def test_4(ip, group_id, driver):
     user_4.signup(driver, msg, send_mismatched_password=True)
     source_4 = driver.page_source
     if user_exists in source_4 or password_mismatch not in source_4 or email_exists in source_4:
-        return failed('4', error_msg)
-    print("if5")
+        return failed('4', msg)
     ut.login_to_django_admin(group_id=group_id, driver=driver, ip=ip, msg=msg)
     if not ut.check_user_in_django_admin(ip, user_1, driver, msg):
         return failed('4', msg)
-    print("if6")
     if ut.check_user_in_django_admin(ip, user_2, driver, msg):
         return failed('4', msg)
-    print("if7")
     if ut.check_user_in_django_admin(ip, user_3, driver, msg):
         return failed('4', msg)
-    print("if8")
     if ut.check_user_in_django_admin(ip, user_4, driver, msg):
         return failed('4', msg)
-    print("if9")
     return passed('4')
 
 
@@ -175,27 +167,27 @@ def submit_contact_us(ip, group_id, driver, msg):
         return None
     if not ut.check_navbar(False, driver, msg):
         return None
-    navbar = ut.find_element_id(driver, "navbar", msg)
+    navbar = ut.find_element_id(driver, "id_navbar", msg)
     if navbar is None:
-        return None
-    contact_us = ut.find_element_id(navbar, "navbar_contact_us", msg)
+        return None 
+    contact_us = ut.find_element_id(navbar, "id_navbar_contact_us", msg)
     if contact_us is None:
         return None
     contact_us.click()
     title_field = ut.find_element_id(driver, "id_title", msg)
     email_field = ut.find_element_id(driver, "id_email", msg)
     text_field = ut.find_element_id(driver, "id_text", msg)
-    submit_button = ut.find_element_id(driver, "signup_submit", msg)
+    submit_button = ut.find_element_id(driver, "id_submit", msg)
     if title_field is None or email_field is None or text_field is None or submit_button is None:
         return None
     if title_field.get_attribute("maxlength") != "40":
-        msg.append("title field maxlength")
+        msg.append("title field maxlength is not 40")
         return None
     if email_field.get_attribute("type") != "email":
-        msg.append("email field type")
+        msg.append("email field type is not email")
         return None
     if text_field.get_attribute("minlength") != "10" or text_field.get_attribute("maxlength") != "250":
-        msg.append("text field min or max length")
+        msg.append("text field min length is not 10 or max length is not 250")
         return None
     message = ContactMessage()
     title_field.send_keys(message.title)
@@ -214,7 +206,8 @@ def test_5(ip, group_id, driver):
     submitted = WebDriverWait(driver, 10).until(
         EC.text_to_be_present_in_element((By.XPATH, "//*"), "درخواست شما ثبت شد"))
     if submitted is None:
-        return failed('5', "sending email took too long time")
+        return failed('5', "sending email took too long time or failed somehow")
+
     return passed('5')
 
 
@@ -255,7 +248,7 @@ def test_7(ip, group_id, driver):
         return failed('7', msg)
     if not ut.check_navbar(False, driver, msg):
         return failed('7', msg)
-    if ut.find_element_id(driver, "navbar", msg) is None:
+    if ut.find_element_id(driver, "id_navbar", msg) is None:
         return failed('7', msg)
     user_1 = User()
     if not user_1.signup(driver, msg):
@@ -265,7 +258,7 @@ def test_7(ip, group_id, driver):
     if not ut.check_navbar(True, driver, msg):
         return failed('7', msg)
     user_1.logout(driver, msg)
-    if "به سامانه استادجو خوش آمدید." not in driver.page_source:
+    if "به سامانه استادجو خوش آمدید" not in driver.page_source:
         return failed('7', 'incorrect or not found welcome message')
     if not ut.check_navbar(False, driver, msg):
         return failed('7', msg)
@@ -277,19 +270,19 @@ def create_user_goto_profile(ip, group_id, driver, msg):
         return None
     if not ut.check_navbar(False, driver, msg):
         return None
-    navbar = ut.find_element_id(driver, "navbar", msg)
+    navbar = ut.find_element_id(driver, "id_navbar", msg)
     if navbar is None:
         return None
-    profile = ut.find_element_id(driver, "navbar_profile", msg)
+    profile = ut.find_element_id(driver, "id_navbar_profile", msg)
     if profile is not None:
-        msg += "profile link on navbar before login"
+        msg.append("profile link visible on navbar before login")
         return None
     user_1 = User()
     if not user_1.signup(driver, msg):
         return None
     if not user_1.login(driver, msg):
         return None
-    profile = ut.find_element_id(driver, "navbar_profile", msg)
+    profile = ut.find_element_id(driver, "id_navbar_profile", msg)
     if profile is None:
         return None
     profile.click()
@@ -303,7 +296,8 @@ def test_8(ip, group_id, driver):
         return failed('8', msg)
     source = driver.page_source
     if user_1.first_name not in source or user_1.last_name not in source or user_1.username not in source:
-        return failed('8', "incorrect user profile information")
+        msg.append("incorrect user profile information")
+        return failed('8', msg)
     return passed('8')
 
 
@@ -312,13 +306,13 @@ def test_9(ip, group_id, driver):
     user_1 = create_user_goto_profile(ip, group_id, driver, msg)
     if user_1 is None:
         return failed('9', msg)
-    edit_profile = ut.find_element_id(driver, "edit_profile", msg)
+    edit_profile = ut.find_element_id(driver, "id_edit_profile", msg)
     if edit_profile is None:
         return failed('9', msg)
     edit_profile.click()
-    field_first_name = ut.find_element_id(driver, "id_first_name", msg)
-    field_last_name = ut.find_element_id(driver, "id_last_name", msg)
-    submit_button = ut.find_css_selector_element(driver, "input[type=submit]", msg)
+    field_first_name = ut.find_element_id(driver, "id_firstname", msg)
+    field_last_name = ut.find_element_id(driver, "id_lastname", msg)
+    submit_button = ut.find_element_id(driver, "id_submit", msg)
     if field_first_name is None or field_last_name is None or submit_button is None:
         return failed('9', msg)
     first_name_salt = ut.random_string(5)
@@ -326,14 +320,15 @@ def test_9(ip, group_id, driver):
     field_first_name.send_keys(first_name_salt)
     field_last_name.send_keys(last_name_salt)
     submit_button.click()
-    field_first_name = ut.find_element_id(driver, "text_firstname", msg)
-    field_last_name = ut.find_element_id(driver, "text_lastname", msg)
+    field_first_name = ut.find_element_id(driver, "id_firstname", msg)
+    field_last_name = ut.find_element_id(driver, "id_lastname", msg)
     if field_first_name is None or field_last_name is None:
         return failed('9', msg)
     edited_first_name = user_1.first_name + first_name_salt
     edited_last_name = user_1.last_name + last_name_salt
     if edited_first_name not in field_first_name.text or edited_last_name not in field_last_name.text:
-        return failed('9', "data hasn't edited properly")
+        msg.append("profile edit hasn't completed correctly")
+        return failed('9', msg)
     return passed('9')
 
 
@@ -342,7 +337,7 @@ def test_10(ip, group_id, driver):
     user_1 = create_user_goto_profile(ip, group_id, driver, msg)
     if user_1 is None:
         return failed('10', msg)
-    edit_profile = ut.find_element_id(driver, "edit_profile", msg)
+    edit_profile = ut.find_element_id(driver, "id_edit_profile", msg)
     if edit_profile is None:
         return failed('9', msg)
     edit_profile.click()
@@ -352,7 +347,7 @@ def test_10(ip, group_id, driver):
     gender_option = {}
     gender_option['M'] = ut.find_css_selector_element(driver, "option[value=M]", msg)
     gender_option['F'] = ut.find_css_selector_element(driver, "option[value=F]", msg)
-    submit = ut.find_css_selector_element(driver, "input[type=submit]", msg)
+    submit = ut.find_css_element_id(driver, "id_submit", msg)
     if bio_field is None or gender_select is None or submit is None \
             or gender_option['M'] is None or gender_option['F'] is None:
         return failed('10', msg)
@@ -362,13 +357,15 @@ def test_10(ip, group_id, driver):
     gender_option[user_1.gender].click()
     submit.click()
     if user_1.bio not in driver.page_source:
-        return failed('10', "user bio has not been saved")
-    text_gender = ut.find_element_id(driver, "text_gender", msg)
+        msg.append("user bio has not been saved in profile")
+        return failed('10', msg)
+    text_gender = ut.find_element_id(driver, "id_gender", msg)
     if text_gender is None:
         return failed('10')
     gender = {'M': "مرد", 'F': "زن"}
     if gender[user_1.gender] not in text_gender.text:
-        return failed('10', "user gender has not been saved correctly")
+        msg.append("user gender has not been saved correctly")
+        return failed('10', msg)
     return passed('10')
 
 
@@ -377,12 +374,12 @@ def test_11(ip, group_id, driver):
     user_1 = create_user_goto_profile(ip, group_id, driver, msg)
     if user_1 is None:
         return failed('11', msg)
-    edit_profile = ut.find_element_id(driver, "edit_profile", msg)
+    edit_profile = ut.find_element_id(driver, "id_edit_profile", msg)
     if edit_profile is None:
         return failed('11', msg)
     edit_profile.click()
-    pic_upload = ut.find_element_id(driver, "id_picture", msg)
-    submit = ut.find_css_selector_element(driver, "input[type=submit]", msg)
+    pic_upload = ut.find_element_id(driver, "id_profile_image", msg)
+    submit = ut.find_element_id(driver, "id_submit", msg)
     if pic_upload is None or submit is None:
         return failed('11', msg)
     imarray = numpy.random.rand(100,100,3) * 255
@@ -390,7 +387,7 @@ def test_11(ip, group_id, driver):
     im.save('sour.png')
     path = pic_upload.send_keys(os.path.abspath('sour.png'))
     submit.click()
-    profile_pic = ut.find_element_id(driver, "profile_image", msg)
+    profile_pic = ut.find_element_id(driver, "id_profile_image", msg)
     if profile_pic is None:
         return failed('11', msg)
     src = profile_pic.get_attribute('src')
@@ -398,7 +395,8 @@ def test_11(ip, group_id, driver):
     img1 = numpy.asarray(Image.open('sour.png'))
     img2 = numpy.asarray(Image.open('temp.png'))
     if numpy.amax(img1 - img2) != 0 or numpy.amin(img1 - img2) != 0:
-        return failed('11', 'images are not equal')
+        msg.append("it seems the profile image has not been uploaded correctly")
+        return failed('11', msg)
     return passed('11')
 
 
@@ -433,7 +431,7 @@ def test_12(ip, group_id, driver):
     user_1 = create_user_goto_profile(ip, group_id, driver, msg)
     if user_1 is None:
         return failed('12', msg)
-    edit_profile = ut.find_element_id(driver, "edit_profile", msg)
+    edit_profile = ut.find_element_id(driver, "id_edit_profile", msg)
     if edit_profile is None:
         return failed('12', msg)
     edit_profile.click()
@@ -441,12 +439,13 @@ def test_12(ip, group_id, driver):
     if bio is None:
         return failed('12', msg)
     bio.send_keys(text)
-    submit = ut.find_css_selector_element(driver, "input[type=submit]", msg)
+    submit = ut.find_element_id(driver, "id_submit", msg)
     if submit is None:
         return failed('12', msg)
     submit.click()
     if result not in driver.page_source:
-        return failed('12', "bio has not been saved correctly")
+        msg.append("bio has not been saved correctly")
+        return failed('12', msg)
     return passed('12')
 
 
@@ -658,14 +657,14 @@ def test_14(ip, group_id, driver):
 def test_22(ip, group_id, driver):
     msg = []
     if not ut.connect(ip, driver, msg):
-        return failed('22', "connection failed")
+        return failed('22', msg)
     if not ut.check_navbar(False, driver, msg):
         return failed('22', msg)
-    login = ut.find_element_id(driver, "navbar_login", msg)
+    login = ut.find_element_id(driver, "id_navbar_login", msg)
     if login is None:
         return failed('22', msg)
     login.click()
-    forget = ut.find_element_id(driver, "forget_password", msg)
+    forget = ut.find_element_id(driver, "id_forget_password", msg)
     if forget is None:
         return failed('22', msg)
     forget.click()
@@ -673,7 +672,7 @@ def test_22(ip, group_id, driver):
     if email_field is None:
         return failed('22', msg)
     email_field.send_keys(ut.random_email())
-    submit = ut.find_element_id(driver, "submit", msg)
+    submit = ut.find_element_id(driver, "id_submit", msg)
     if submit is None:
         return failed('22', msg)
     submit.click()
@@ -684,11 +683,11 @@ def test_22(ip, group_id, driver):
     if not user_1.signup(driver, msg):
         return failed('22', msg)
     print(user_1.__dict__)
-    login = ut.find_element_id(driver, "navbar_login", msg)
+    login = ut.find_element_id(driver, "id_navbar_login", msg)
     if login is None:
         return failed('22', msg)
     login.click()
-    forget = ut.find_element_id(driver, "forget_password", msg)
+    forget = ut.find_element_id(driver, "id_forget_password", msg)
     if forget is None:
         return failed('22', msg)
     forget.click()
@@ -696,7 +695,7 @@ def test_22(ip, group_id, driver):
     if email_field is None:
         return failed('22', msg)
     email_field.send_keys(user_1.email)
-    submit = ut.find_element_id(driver, "submit", msg)
+    submit = ut.find_element_id(driver, "id_submit", msg)
     if submit is None:
         return failed('22', msg)
     submit.click()
@@ -714,7 +713,7 @@ def test_22(ip, group_id, driver):
     username_field.send_keys("ostadju@fastmail.com")
     password_field.send_keys("thegreatramz")
     login_button.click()
-    WebDriverWait(driver, 10).until(
+    WebDriverWait(driver, 20).until(
         EC.text_to_be_present_in_element((By.XPATH, "//*"), user_1.username))
     title_link = ut.find_css_selector_element(driver, "div[title={}]".format(user_1.username), msg)
     if title_link is None:
@@ -731,11 +730,20 @@ def test_22(ip, group_id, driver):
         msg.append("reset is None")
         return failed('22', msg)
     print(reset.text)
+    driver.implicitly_wait(2)
     driver.get(reset.text)
+    
+    try:
+        WebDriverWait(driver, 3).until(EC.alert_is_present(), 'Timed out waiting for PA creation' + 'confirmation popup to appear.')
+        alert = driver.switch_to.alert
+        alert.accept()
+        print("alert accepted")
+    except:
+        print("no alert")
 
     pass1 = ut.find_element_id(driver, "id_password1", msg)
     pass2 = ut.find_element_id(driver, "id_password2", msg)
-    submit = ut.find_element_id(driver, "submit", msg)
+    submit = ut.find_element_id(driver, "id_submit", msg)
     if pass1 is None or pass2 is None or submit is None:
         return failed('22', msg)
     user_1.password = ut.random_string(10)
@@ -770,8 +778,8 @@ def test_15(ip, group_id, driver):
     if not user2.login(driver, msg):
         return failed('15', msg)
 
-    search_box = ut.find_css_selector_element(driver, 'search_profiles_input', msg)
-    search_button = ut.find_css_selector_element(driver, 'search_profiles_button', msg)
+    search_box = ut.find_css_selector_element(driver, 'id_search_profiles_input', msg)
+    search_button = ut.find_css_selector_element(driver, 'id_search_profiles_button', msg)
     if search_box is None or search_button is None:
         return failed('15', msg)
     search_box.send_keys(user1.username)
@@ -1058,7 +1066,7 @@ def test_19(ip, group_id, driver):
 
 
 def test_20(ip, group_id, driver):
-    msg = ''
+    msg = []
     if not ut.connect(ip, driver, msg):
         return failed('20', msg)
     if not ut.check_navbar(False, driver, msg):
@@ -1086,12 +1094,13 @@ def test_20(ip, group_id, driver):
     if event.user.first_name in source and \
             event.user.last_name in source and \
             event.date in source and event.begin_time in source and event.end_time in source:
+        msg.append("student cancled meeting but still visible in his/her profile")
         return failed('20', msg)
     return passed('20')
 
 
 def test_21(ip, group_id, driver):
-    msg = ''
+    msg = []
     if not ut.connect(ip, driver, msg):
         return failed('21', msg)
     if not ut.check_navbar(False, driver, msg):
@@ -1167,7 +1176,8 @@ def test_23(ip, group_id, driver):
         if not user.signup(driver, msg, send_type=True):
             return failed('23', msg)
         if driver.current_url != home_url or driver.page_source != home_source:
-            return failed('23', 'redirect to home after signup failed')
+            msg.append('redirect to home after signup failed')
+            return failed('23', msg)
 
         #todo REMOVE THESE LINES
         #########################
@@ -1215,9 +1225,9 @@ def test_24(ip, group_id, driver):
 
     for teacher in res:
         driver.get(ip + teacher['profile_url'])
-        id_first_name = ut.find_element_id(driver, 'text_firstname', msg)
-        id_last_name = ut.find_element_id(driver, 'text_lastname', msg)
-        id_user_name = ut.find_element_id(driver, 'text_username', msg)
+        id_first_name = ut.find_element_id(driver, 'id_firstname', msg)
+        id_last_name = ut.find_element_id(driver, 'id_lastname', msg)
+        id_user_name = ut.find_element_id(driver, 'id_username', msg)
         if id_first_name is None or id_last_name is None or id_user_name is None:
             return failed('24', msg)
         if id_first_name.text.strip() != teacher['first_name']:
@@ -1253,8 +1263,8 @@ def test_25(ip, group_id, driver):
         return failed('25', msg)
     if not user.login(driver, msg):
         return failed('25', msg)
-    search_box = ut.find_css_selector_element(driver, 'search_profiles_input', msg)
-    search_button = ut.find_css_selector_element(driver, 'search_profiles_button', msg)
+    search_box = ut.find_css_selector_element(driver, 'id_search_profiles_input', msg)
+    search_button = ut.find_css_selector_element(driver, 'id_search_profiles_button', msg)
     if search_box is None or search_button is None:
         return failed('25', msg)
     search_box.send_keys(user.username)
@@ -1291,11 +1301,11 @@ def test_26(ip, group_id, driver):
     driver.get(ip)
     if not user_1.login(driver, msg):
         return failed('26', msg)
-    navbar_profile = ut.find_element_id(driver, "navbar_profile", msg)
+    navbar_profile = ut.find_element_id(driver, "id_navbar_profile", msg)
     if navbar_profile is None:
         return failed('26', msg)
     navbar_profile.click()
-    remove_user = ut.find_element_id(driver, "remove_user", msg)
+    remove_user = ut.find_element_id(driver, "id_remove_user", msg)
     if remove_user is None:
         return failed('26', msg)
     remove_user.click()
@@ -1303,27 +1313,17 @@ def test_26(ip, group_id, driver):
     if username_field is None:
         return failed('26', msg)
     username_field.send_keys(user_1.username)
-    submit = ut.find_element_id(driver, "remove_user", msg)
+#    submit = ut.find_element_id(driver, "id_remove_user", msg)
+#    if submit is None:
+#        return failed('26', msg)
+#    submit.click()
+    submit = driver.switchTo().alert()
     if submit is None:
-        return failed('26', msg)
-    submit.click()
+        return failed('26', "no remove user confirmation dialog displayed")
+    submit.accept()
     if not ut.login_to_django_admin(group_id, driver, ip, msg):
         return failed('26', msg)
     if ut.check_user_in_django_admin(ip, user_1, driver, msg):
-        return failed('26', "user is still here")
-    return passed('26')
-
-
-def test_26(ip, group_id, driver):
-    msg = ''
-    user = create_user_goto_profile(ip, group_id, driver, msg)
-    if user is None:
-        return failed('26', msg)
-    id_remove = ut.find_element_id(driver, 'remove-user', msg)
-    if id_remove is None:
-        return failed('26', msg)
-    ut.login_to_django_admin(group_id=group_id, driver=driver, ip=ip, msg=msg)
-    if ut.check_user_in_django_admin(ip, user, driver, msg):
-        return failed('26', msg)
+        return failed('26', "user has not been removed")
     return passed('26')
 
