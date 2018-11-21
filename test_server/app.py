@@ -2,6 +2,7 @@ import sys
 from ast import literal_eval
 from datetime import datetime, timedelta
 from threading import Thread
+from urllib.error import URLError
 from urllib.request import urlopen
 
 import configuration as config
@@ -79,7 +80,7 @@ def handle_request():
 def check_url_availability(url):
     try:
         return_code = _check_url_availability(url)
-    except TimeoutError:
+    except (TimeoutError, URLError):
         return_code = 500
 
     return return_code == 200
@@ -183,7 +184,6 @@ def runserver(port=config.PORT):
 
 
 if __name__ == '__main__':
-    # print(check_url_availability('http://192.168.2.2'))
 
     try:
         utils.load_admins("admins.json")
