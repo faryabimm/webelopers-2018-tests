@@ -2,6 +2,7 @@ import sys
 from ast import literal_eval
 from datetime import datetime, timedelta
 from threading import Thread
+from urllib.request import urlopen
 
 import configuration as config
 import logger
@@ -75,10 +76,24 @@ def handle_request():
         return "error - existing test in progress", 406
 
 
+def check_url_availability(url):
+    try:
+        return_code = _check_url_availability(url)
+    except TimeoutError:
+        return_code = 500
+
+    return return_code == 200
+
+
+@timeout(seconds=config.ACCESS_TIMEOUT_S, use_signals=False)
+def _check_url_availability(url):
+    return urlopen(url).getcode()
+
+
 def worker_run_tests(ip, test_order, group_id):
     test_results = {}
 
-    if requests.get(ip).status_code != 200:
+    if not check_url_availability(ip):
         test_results['verdict'] = 'not_reachable'
         test_results['test_order'] = test_order[0]  # TOF :(
         test_results['log'] = 'not reachable'
@@ -150,18 +165,16 @@ def process_request(ip, group_id, test_order):
 
 @timeout(config.TEST_TIMEOUT_S, use_signals=False)
 def run_test(test_function, ip, group_id):
-    print(1)
     driver = group_status[group_id]['driver']
-    print(2)
-    # utils.clear_cache(driver)
+
     driver.get(ip)
     driver.delete_all_cookies()
-    print(3)
+
     result, string_output = test_function(
         ip, group_id, driver
     )
-    print(4)
-    print(result, string_output, 'HMM')
+
+    # print(result, string_output, 'HMM')
     return result, string_output, 'HMM'
 
 
@@ -170,9 +183,7 @@ def runserver(port=config.PORT):
 
 
 if __name__ == '__main__':
-    # print(run_test(tests.test_7, None))
-    # display = Display(visible=0, size=(800, 600))
-    # display.start()
+    # print(check_url_availability('http://192.168.2.2'))
 
     try:
         utils.load_admins("admins.json")
