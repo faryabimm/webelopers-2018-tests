@@ -10,7 +10,7 @@ import tests
 import utils
 from flask import Flask, request
 from selenium import webdriver
-from timeout_decorator import timeout, TimeoutError
+from timeout_decorator import TimeoutError
 
 app = Flask(__name__)
 
@@ -90,10 +90,7 @@ def worker_run_tests(ip, test_order, group_id):
             test_name = 'test_{}'.format(test_id)
             test_function = getattr(tests, test_name)
 
-            try:
-                test_result, string_output, stack_trace = run_test(test_function, ip, group_id)
-            except TimeoutError:
-                test_result, string_output, stack_trace = False, 'timeout', 'timeout'
+            test_result, string_output, stack_trace = run_test(test_function, ip, group_id)
 
             test_results['verdict'] = 'ok' if test_result else 'ez_sag'
             test_results['test_order'] = test_id
@@ -147,7 +144,6 @@ def process_request(ip, group_id, test_order):
     thread.start()
 
 
-@timeout(config.TEST_TIMEOUT_S, use_signals=False)
 def run_test(test_function, ip, group_id):
     print(1)
     driver = group_status[group_id]['driver']
