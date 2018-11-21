@@ -113,12 +113,13 @@ class User:
             return False
         i = 0
         while True:
-            id_res = ut.find_element_id(driver, 'reserved-free-time-' + str(i), msg)
+            id_res = ut.find_element_id(driver, 'id_reserved_meeting_' + str(i), msg)
             if id_res is None:
+                msg.pop()
                 break
             source = id_res.text
             if event.user.first_name in source and event.user.last_name in source and event.date in source and event.begin_time in source and event.end_time in source:
-                id_res = ut.find_element_id(driver, "cancel_meeting", msg)
+                id_res = ut.find_element_id(driver, "id_cancel_meeting", msg)
                 if id_res is None:
                     return False
                 id_res.click()
