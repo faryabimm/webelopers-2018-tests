@@ -50,7 +50,7 @@ def deactivate_status(group_id):
 @app.route('/', methods=['GET', 'POST'])
 def handle_request():
     request_data = request.form
-    if 'ip' not in request_data or 'group_id' not in request_data:
+    if 'ip' not in request_data or 'group_id' not in request_data or 'port' not in request_data:
         logger.log_error('malformed post request data.')
         return 'malformed post request data.', 400
 
@@ -58,11 +58,13 @@ def handle_request():
 
     if test_and_set_active(group_id):
         logger.log_info('lock acquired for group_id', group_id)
-        ip = request_data['ip']
+        ip = 'http://{}:{}'.format(request_data['ip'], request_data['port'])
         test_order = None
         if 'test_order' in request_data:
             logger.log_info('custom test order was given for group_id', group_id)
             test_order = literal_eval(request_data['test_order'])
+            if type(test_order) == int:
+                test_order = [test_order]
 
         process_request(ip, group_id, test_order)
         logger.log_success('test for group_id', group_id, 'initiated successfully')
@@ -74,7 +76,16 @@ def handle_request():
 
 def worker_run_tests(ip, test_order, group_id):
     test_results = {}
+
+    if requests.get(ip).status_code != 200:
+        test_results['verdict'] = 'not_reachable'
+        test_results['test_order'] = test_order[0]  # TOF :(
+        test_results['log'] = 'not reachable'
+        test_results['trace'] = ''
+        return test_results
+
     if test_order is not None:
+        # print(test_order)
         for test_id in test_order:
             test_name = 'test_{}'.format(test_id)
             test_function = getattr(tests, test_name)
@@ -84,9 +95,10 @@ def worker_run_tests(ip, test_order, group_id):
             except TimeoutError:
                 test_result, string_output, stack_trace = False, 'timeout', 'timeout'
 
-            test_results[test_name] = test_result
-            test_results['{}_log'.format(test_name)] = string_output
-            test_results['{}_trace'.format(test_name)] = stack_trace
+            test_results['verdict'] = 'ok' if test_result else 'ez_sag'
+            test_results['test_order'] = test_id
+            test_results['log'] = string_output
+            test_results['trace'] = stack_trace
 
     else:
         for entry in dir(tests):
@@ -121,8 +133,12 @@ def worker_function(ip, group_id, test_order):
 
 
 def report_test_results(group_id, test_results):
+    print('http://{}:{}/{}'.format(config.REPORT_SERVER_HOST, config.REPORT_SERVER_PORT, config.REPORT_SERVER_PATH))
+    print(test_results)
     test_results['group_id'] = group_id
-    requests.post('http://{}:{}'.format(config.REPORT_SERVER_HOST, config.REPORT_SERVER_PORT), test_results)
+    requests.post(
+        'http://{}:{}/{}'.format(config.REPORT_SERVER_HOST, config.REPORT_SERVER_PORT, config.REPORT_SERVER_PATH),
+        test_results)
 
 
 def process_request(ip, group_id, test_order):
