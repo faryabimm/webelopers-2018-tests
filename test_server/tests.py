@@ -95,7 +95,7 @@ def test_3(ip, group_id, driver):
     # checking wrong user
     if not ut.connect(ip, driver, msg):
         return failed('3', msg)
-    print(driver.page_source())
+    print(driver.page_source)
     driver.delete_all_cookies()
     wrong_user = User()
     if not wrong_user.login(driver, msg):
