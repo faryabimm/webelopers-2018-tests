@@ -9,7 +9,7 @@ def connect(ip, driver, msg):
         driver.get(ip)
         return True
     except:
-        msg.append("Connection timed out {}!".format(ip))
+        msg.append("failed to connect to {}!".format(ip))
         return False
 
 
@@ -19,7 +19,7 @@ def find_element_id(look_in, look_for, msg):
     try:
         return look_in.find_element_by_id(look_for)
     except:
-        msg.append("{} not found".format(look_for))
+        msg.append("no element with id={} found".format(look_for))
         return None
 
 
@@ -27,7 +27,7 @@ def find_element_class(look_in, look_for, msg):
     try:
         return look_in.find_element_by_class_name(look_for)
     except:
-        msg.append("{} not found".format(look_for))
+        msg.append("no element with class={} found".format(look_for))
         return None
 
 
@@ -35,7 +35,7 @@ def find_element_tag(look_in, look_for, msg):
     try:
         return look_in.find_element_by_tag_name(look_for)
     except:
-        msg.append("{} not found".format(look_for))
+        msg.append("no element with tag={} found".format(look_for))
         return None
 
 
@@ -43,7 +43,7 @@ def find_element_name(look_in, look_for, msg):
     try:
         return look_in.find_element_by_name(look_for)
     except:
-        msg.append("{} not found".format(look_for))
+        msg.append("no element with name={} found".format(look_for))
         return None
 
 
@@ -51,7 +51,7 @@ def find_css_selector_element(look_in, css_selector, msg):
     try:
         return look_in.find_element_by_css_selector(css_selector)
     except:
-        msg.append("{} not found".format(css_selector))
+        msg.append("no element with css_selector={} found".format(css_selector))
         return None
 
 
@@ -59,7 +59,7 @@ def find_xpath_element(look_in, xpath, msg):
     try:
         return look_in.find_elements_by_xpath(xpath)
     except:
-        msg.append("{} not found".format(xpath))
+        msg.append("no element with xpath={} found".format(xpath))
         return None
 
 
@@ -68,7 +68,7 @@ def fill_field(field, text, msg):
         field.send_keys(text)
         return True
     except:
-        msg.append("{} not filled".format(field.get_attribute("id")))
+        msg.append("failed to fill field {}".format(field.get_attribute("id")))
         return False
 
 
@@ -116,17 +116,16 @@ def random_email():
 def check_navbar(logged_in, driver, msg):
     navbar = find_element_id(driver, "navbar", msg)
     if navbar is None:
-        msg.append("navbar is none")
         return False
-    navbar_home = find_element_id(navbar, "navbar_home", msg)
+    navbar_home = find_element_id(navbar, "id_navbar_home", msg)
     if not logged_in:
-        navbar_login = find_element_id(navbar, "navbar_login", msg)
-        navbar_signup = find_element_id(navbar, "navbar_signup", msg)
+        navbar_login = find_element_id(navbar, "id_navbar_login", msg)
+        navbar_signup = find_element_id(navbar, "id_navbar_signup", msg)
         if navbar_login is None or navbar_signup is None or navbar_home is None:
             msg.append("navbar links are not complete")
             return False
     else:
-        navbar_logout = find_element_id(navbar, "navbar_logout", msg)
+        navbar_logout = find_element_id(navbar, "id_navbar_logout", msg)
         if navbar_home is None or navbar_logout is None:
             msg.append("navbar links are not complete")
             return False
@@ -134,8 +133,8 @@ def check_navbar(logged_in, driver, msg):
 
 
 def search(query, driver, msg):
-    search_box = find_css_selector_element(driver, 'search_profiles_input', msg)
-    search_button = find_css_selector_element(driver, 'search_profiles_button', msg)
+    search_box = find_element_id(driver, 'id_search_profiles_input', msg)
+    search_button = find_element_id(driver, 'id_search_profiles_button', msg)
     if search_box is None or search_button is None:
         return False
     search_box.send_keys(query)
@@ -203,7 +202,7 @@ def check_event_in_django_admin(ip, event, driver, msg):
 
     event_link = None
     for a in driver.find_elements_by_xpath("//a"):
-        if a.text == "Teacher Free Times":
+        if a.text == "Meetings":
             event_link = a
             break
     if event_link is None:
@@ -220,7 +219,7 @@ def check_event_in_django_admin(ip, event, driver, msg):
     event_link.click()
     source = driver.page_source
     if event.begin_time not in source or event.end_time not in source or event.date not in source:
-        msg.append("event information have not been saved correctly")
+        msg.append("meeting information have not been saved correctly")
         return False
     return True
 
@@ -231,7 +230,7 @@ def check_reserve_in_django_admin(ip, event, user, driver, msg):
 
     event_link = None
     for a in driver.find_elements_by_xpath("//a"):
-        if a.text == "Reserved Free Times":
+        if a.text == "Reserved Meetings":
             event_link = a
             break
     if event_link is None:
