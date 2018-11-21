@@ -571,7 +571,7 @@ def test_22(ip, group_id, driver):
     if forget is None:
         return failed('22', msg)
     forget.click()
-    email_field = ut.find_elemnt_id(driver, "id_email", msg)
+    email_field = ut.find_element_id(driver, "id_email", msg)
     if email_field is None:
         return failed('22', msg)
     email_field.send_keys(ut.random_email())
@@ -585,7 +585,8 @@ def test_22(ip, group_id, driver):
     user_1.email = "ostadju@fastmail.com"
     if not user_1.signup(driver, msg):
         return failed('22', msg)
-    login = ut.find_elemnt_id(driver, "navbar_login", msg)
+    print(user_1.__dict__)
+    login = ut.find_element_id(driver, "navbar_login", msg)
     if login is None:
         return failed('22', msg)
     login.click()
@@ -610,19 +611,44 @@ def test_22(ip, group_id, driver):
     username_field = ut.find_element_name(driver, "username", msg)
     password_field = ut.find_element_name(driver, "password", msg)
     login_button = ut.find_css_selector_element(driver, "button", msg)
-    if username_field is None or passowrd_field is None or login_button is None:
+    if username_field is None or password_field is None or login_button is None:
         return failed('22', msg)
     username_field.send_keys("ostadju@fastmail.com")
     password_field.send_keys("thegreatramz")
     login_button.click()
-    WebDriverWait(driver, 5).until(
-        EC.text_to_be_present_in_element((By.XPATH, "//*"), "No Conversation Selected"))
-    title_link = ut.find_css_selector_element(driver, "div[title={}]".format(user_1.username))
+    WebDriverWait(driver, 10).until(
+        EC.text_to_be_present_in_element((By.XPATH, "//*"), user_1.username))
+    title_link = ut.find_css_selector_element(driver, "div[title={}]".format(user_1.username), msg)
     if title_link is None:
         return failed('22', msg)
     title_link.click()
-    
+    WebDriverWait(driver, 10).until(
+        EC.text_to_be_present_in_element((By.XPATH, "//*[contains(@class,'v-ThreadMessage')]"), user_1.username))
+    message_body = ut.find_css_selector_element(driver, "div[class=v-Message-body]", msg)
+    if message_body is None:
+        msg.append("message body is None")
+        return failed('22', msg)
+    reset = ut.find_css_selector_element(message_body, "a", msg)
+    if reset is None:
+        msg.append("reset is None")
+        return failed('22', msg)
+    print(reset.text)
+    driver.get(reset.text)
 
+    pass1 = ut.find_element_id(driver, "id_password1", msg)
+    pass2 = ut.find_element_id(driver, "id_password2", msg)
+    submit = ut.find_element_id(driver, "submit", msg)
+    if pass1 is None or pass2 is None or submit is None:
+        return failed('22', msg)
+    user_1.password = ut.random_string(10)
+    pass1.send_keys(user_1.password)
+    pass2.send_keys(user_1.password)
+    submit.click()
+    if not user_1.login(driver, msg):
+        return failed('22', "after password change cant login")
+    test_26(ip, group_id, driver)
+    return passed('22')
+ 
     
 def test_23(ip, group_id, driver):
     msg = []
