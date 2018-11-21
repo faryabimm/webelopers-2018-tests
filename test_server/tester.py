@@ -7,7 +7,7 @@ print(datetime.datetime.now().time())
 options = webdriver.ChromeOptions()
 #options.add_argument('headless')
 driver = webdriver.Chrome(chrome_options=options)
-print(tests.test_16("http://localhost:8000", "2", driver))
+print(tests.test_21("http://localhost:8000", "2", driver))
 # driver.close()
 print(datetime.datetime.now().time())
 
