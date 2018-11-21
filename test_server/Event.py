@@ -104,4 +104,36 @@ class Event:
         id_submit.click()
         return True
 
+    def delete(self, driver, msg, logout_login=True):
+        if logout_login:
+            self.user.logout(driver, msg)
+            if not self.user.login(driver, msg):
+                return False
+        id_profile = ut.find_element_id(driver, 'navbar_profile', msg)
+        if id_profile is None:
+            return False
+        id_profile.click()
+
+        i = 0
+        id_change = None
+        while True:
+            id_event = ut.find_element_id(driver, 'free-time-' + str(i), msg)
+            if id_event is None:
+                break
+            source = id_event.text
+            if self.date in source and self.begin_time in source and self.end_time in source and str(self.capacity) in source:
+                id_change = ut.find_element_id(id_event, 'update-teacher-free-time', msg)
+                if id_change is None:
+                    return False
+                break
+            i += 1
+        if id_change is None:
+            return False
+        id_change.click()
+        id_remove = ut.find_element_id(driver, 'remove-free-time', msg)
+        if id_remove is None:
+            return False
+        id_remove.click()
+        return True
+
 
