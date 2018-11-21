@@ -28,17 +28,18 @@ class Event:
 
     def create(self, driver, msg, logout_login=True):
         if logout_login:
-            self.user.logout(driver, msg)
+            if not self.user.logout(driver, msg):
+                msg.pop()
             if not self.user.login(driver, msg):
                 return False
         create_link = ut.find_element_id(driver, "id_navbar_meeting", msg)
         if create_link is None:
             return False
         create_link.click()
-        id_date = ut.find_element_id(driver, "id_meeting_date", msg)
-        id_begin_time = ut.find_element_id(driver, "id_meeting_start_time", msg)
-        id_end_time = ut.find_element_id(driver, "id_meeting_end_time", msg)
-        id_capacity = ut.find_element_id(driver, "id_meeting_student_capacity", msg)
+        id_date = ut.find_element_id(driver, "id_date", msg)
+        id_begin_time = ut.find_element_id(driver, "id_start", msg)
+        id_end_time = ut.find_element_id(driver, "id_end", msg)
+        id_capacity = ut.find_element_id(driver, "id_student_capacity", msg)
         if id_begin_time is None or id_capacity is None or id_date is None or id_end_time is None:
             return False
         id_end_time.send_keys(self.end_time)
@@ -65,8 +66,9 @@ class Event:
         i = 0
         id_change = None
         while True:
-            id_event = ut.find_element_id(driver, 'free-time-' + str(i), msg)
+            id_event = ut.find_element_id(driver, 'id_meeting_' + str(i), msg)
             if id_event is None:
+                msg.pop()
                 break
             source = id_event.text
             # print(source)
@@ -75,7 +77,7 @@ class Event:
             # print(self.old.end_time)
             # print(self.old.capacity)
             if self.old.date in source and self.old.begin_time in source and self.old.end_time in source and str(self.old.capacity) in source:
-                id_change = ut.find_element_id(id_event, 'update-teacher-free-time', msg)
+                id_change = ut.find_element_id(id_event, 'id_edit_meeting', msg)
                 if id_change is None:
                     return False
                 break
@@ -83,10 +85,10 @@ class Event:
         if id_change is None:
             return False
         id_change.click()
-        id_date = ut.find_element_id(driver, "id_meeting_date", msg)
-        id_begin_time = ut.find_element_id(driver, "id_meeting_start_time", msg)
-        id_end_time = ut.find_element_id(driver, "id_meeting_end_time", msg)
-        id_capacity = ut.find_element_id(driver, "id_meeting_student_capacity", msg)
+        id_date = ut.find_element_id(driver, "id_date", msg)
+        id_begin_time = ut.find_element_id(driver, "id_start", msg)
+        id_end_time = ut.find_element_id(driver, "id_end", msg)
+        id_capacity = ut.find_element_id(driver, "id_student_capacity", msg)
         if id_begin_time is None or id_capacity is None or id_date is None or id_end_time is None:
             return False
         id_end_time.clear()
@@ -117,12 +119,12 @@ class Event:
         i = 0
         id_change = None
         while True:
-            id_event = ut.find_element_id(driver, 'free-time-' + str(i), msg)
+            id_event = ut.find_element_id(driver, 'id_meeting_' + str(i), msg)
             if id_event is None:
                 break
             source = id_event.text
             if self.date in source and self.begin_time in source and self.end_time in source and str(self.capacity) in source:
-                id_change = ut.find_element_id(id_event, 'update-teacher-free-time', msg)
+                id_change = ut.find_element_id(id_event, 'id_edit_meeting', msg)
                 if id_change is None:
                     return False
                 break
@@ -130,7 +132,7 @@ class Event:
         if id_change is None:
             return False
         id_change.click()
-        id_remove = ut.find_element_id(driver, 'remove_meeting', msg)
+        id_remove = ut.find_element_id(driver, 'id_remove_meeting', msg)
         if id_remove is None:
             return False
         id_remove.click()

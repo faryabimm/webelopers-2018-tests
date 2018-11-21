@@ -507,11 +507,15 @@ def test_13(ip, group_id, driver):
 
     i = 0
     while True:
-        username = ut.find_element_id(driver, 'teacher' + str(i) + '-username', msg)
-        first_name = ut.find_element_id(driver, 'teacher' + str(i) + '-first_name', msg)
-        last_name = ut.find_element_id(driver, 'teacher' + str(i) + '-last_name', msg)
-        if username is None or first_name is None or last_name is None:
+        teacher = ut.find_element_id(driver, 'id_teacher_' + str(i), msg)
+        if teacher is None:
+            msg.pop()
             break
+        username = ut.find_element_id(teacher, 'id_username', msg)
+        first_name = ut.find_element_id(teacher, 'id_firstname', msg)
+        last_name = ut.find_element_id(teacher, 'id_lastname', msg)
+        if username is None or first_name is None or last_name is None:
+            return failed('13', msg)
         username = username.text.strip()
         first_name = first_name.text.strip()
         last_name = last_name.text.strip()
@@ -520,14 +524,18 @@ def test_13(ip, group_id, driver):
 
     for user in correct_list:
         if user.username not in found:
+            msg.append('username not found for one of teachers')
             return failed('13', msg)
         if found[user.username][0] != user.first_name:
+            msg.append('first name not found for one of teachers')
             return failed('13', msg)
         if found[user.username][1] != user.last_name:
+            msg.append('last name not found for one of teachers')
             return failed('13', msg)
 
     for user in wrong_list:
         if user.username in found:
+            msg.append('wrong teachers found')
             return failed('13', msg)
 
     return passed('13')
@@ -541,14 +549,10 @@ def test_14(ip, group_id, driver):
         return failed('14', msg)
     if not ut.check_navbar(False, driver, msg):
         return failed('14', msg)
-    # home_url = driver.current_url
-    # home_source = driver.page_source
     if not user.signup(driver, msg, send_type=True):
         return failed('14', msg)
     if not event.create(driver, msg):
         return failed('14', msg)
-    # if driver.current_url != home_url or driver.page_source != home_source:
-    #     return failed('14', 'redirect to home after creation failed')
 
 
 
@@ -647,11 +651,13 @@ def test_14(ip, group_id, driver):
             return failed('14', msg)
         if test['a'] != 0:
             if errors[test['a']] not in driver.page_source:
-                return failed('14', 'wrong error msg')
+                msg.append('wrong error msg')
+                return failed('14', msg)
         else:
             for i in range(1, len(errors)):
                 if errors[i] in driver.page_source:
-                    return failed('14', 'wrong error msg')
+                    msg.append('wrong error msg')
+                    return failed('14', msg)
         # if not user.logout(driver, msg):
         #     return failed('14', msg)
 
@@ -761,57 +767,34 @@ def test_22(ip, group_id, driver):
  
     
 def test_15(ip, group_id, driver):
-    msg = ''
+    msg = []
     user1 = User([False])
-    user2 = User([True])
     event = Event(user1)
     if not ut.connect(ip, driver, msg):
         return failed('15', msg)
     if not ut.check_navbar(False, driver, msg):
         return failed('15', msg)
-    # home_url = driver.current_url
-    # home_source = driver.page_source
     if not user1.signup(driver, msg, send_type=True):
         return failed('15', msg)
     if not event.create(driver, msg):
         return failed('15', msg)
-    if not user1.logout(driver, msg):
+    if not user1.go_to_profile(driver, msg):
         return failed('15', msg)
-    if not user2.signup(driver, msg, send_type=True):
-        return failed('15', msg)
-    if not user2.login(driver, msg):
-        return failed('15', msg)
-
-    search_box = ut.find_css_selector_element(driver, 'id_search_profiles_input', msg)
-    search_button = ut.find_css_selector_element(driver, 'id_search_profiles_button', msg)
-    if search_box is None or search_button is None:
-        return failed('15', msg)
-    search_box.send_keys(user1.username)
-    search_button.click()
-    username_link = None
-    for a in driver.find_elements_by_xpath("//a"):
-        if a.text == user1.username:
-            username_link = a
-            break
-    if username_link is None:
-        return failed('15', msg)
-    username_link.click()
     source = driver.page_source
     if event.date not in source or event.begin_time not in source or event.end_time not in source:
+        msg.append('some meeting information not found')
         return failed('15', msg)
     return passed('15')
 
 
 def test_16(ip, group_id, driver):
-    msg = ''
+    msg = []
     user = User([False])
     event = Event(user)
     if not ut.connect(ip, driver, msg):
         return failed('16', msg)
     if not ut.check_navbar(False, driver, msg):
         return failed('16', msg)
-    # home_url = driver.current_url
-    # home_source = driver.page_source
     if not user.signup(driver, msg, send_type=True):
         return failed('16', msg)
     if not event.create(driver, msg):
@@ -819,8 +802,6 @@ def test_16(ip, group_id, driver):
     event.new()
     if not event.save(driver, msg, logout_login=False):
         return failed('16', msg)
-    # if driver.current_url != home_url or driver.page_source != home_source:
-    #     return failed('16', 'redirect to home after creation failed')
 
     #todo maybe removed
     ####################
@@ -843,6 +824,7 @@ def test_16(ip, group_id, driver):
     error_invalid_begin = 'زمان شروع وارد شده معتبر نمی‌باشد'
     error_invalid_end = 'زمان پایان وارد شده معتبر نمی‌باشد'
     error_invalid_date = 'تاریخ وارد شده معتبر نمی‌باشد'
+    error_capacity = 'ظرفیت جدید کمتر از تعداد رزروها است'
 
     date1 = time.strftime('%Y-%m-%d', ut.random_date_time())
     date2 = time.strftime('%Y-%m-%d', ut.random_date_time())
@@ -872,11 +854,11 @@ def test_16(ip, group_id, driver):
 
     dates = [date1, date2, invalid_date1, invalid_date2, invalid_date3]
     times = [time1, time2, time3, time4, invalid_time1, invalid_time2, invalid_time3, invalid_time4, time5, time6]
-    errors = [None, error_conflict, error_begin_end, error_invalid_begin, error_invalid_end, error_invalid_date]
+    errors = [None, error_conflict, error_begin_end, error_invalid_begin, error_invalid_end, error_invalid_date, error_capacity]
 
-    # print(dates)
-    # print(times)
-    # print(errors)
+    print(dates)
+    print(times)
+    print(errors)
 
     test_cases = [{'d1': 0, 'd2': 0, 'b1': 0, 'e1': 3, 'b2': 1, 'e2': 2, 'd3': 0, 'b3': 8, 'e3': 9, 'a': 1, 'n': True},
                   {'d1': 0, 'd2': 0, 'b1': 0, 'e1': 2, 'b2': 1, 'e2': 3, 'd3': 0, 'b3': 8, 'e3': 9,  'a': 1, 'n': True},
@@ -894,7 +876,8 @@ def test_16(ip, group_id, driver):
                   {'d1': 'x', 'd2': 1, 'b2': 0, 'e2': 7, 'd3': 'x', 'a': 4, 'n': False},
                   {'d1': 'x', 'd2': 2, 'b2': 0, 'e2': 1, 'd3': 'x', 'a': 5, 'n': False},
                   {'d1': 'x', 'd2': 3, 'b2': 0, 'e2': 1, 'd3': 'x', 'a': 5, 'n': False},
-                  {'d1': 'x', 'd2': 4, 'b2': 0, 'e2': 1, 'd3': 'x', 'a': 5, 'n': False}]
+                  {'d1': 'x', 'd2': 4, 'b2': 0, 'e2': 1, 'd3': 'x', 'a': 5, 'n': False},
+                  {'d1': 'x', 'd2': 0, 'b2': 8, 'e2': 9, 'd3': 0, 'b3': 8, 'e3': 9, 'a': 6, 'c3': 5, 'c2': 4, 'n': False}]
 
     user = None
     for test in test_cases:
@@ -919,6 +902,8 @@ def test_16(ip, group_id, driver):
             event2.date = dates[test['d3']]
             event2.begin_time = times[test['b3']]
             event2.end_time = times[test['e3']]
+            if 'c3' in test:
+                event2.capacity = test['c3']
             if not event2.create(driver, msg, logout_login=(test['n'] and test['d1'] == 'x')):
                 return failed('16', msg)
 
@@ -926,18 +911,22 @@ def test_16(ip, group_id, driver):
         event2.date = dates[test['d2']]
         event2.begin_time = times[test['b2']]
         event2.end_time = times[test['e2']]
+        if 'c2' in test:
+            event2.capacity = test['c2']
         if not event2.save(driver, msg, logout_login=(test['n'] and test['d1'] == 'x')):
             return failed('16', msg)
 
         if test['a'] != 0:
             if errors[test['a']] not in driver.page_source:
-                # print(test)
-                return failed('16', 'wrong error msg')
+                print(test)
+                msg.append('wrong error msg')
+                return failed('16', msg)
         else:
             for i in range(1, len(errors)):
                 if errors[i] in driver.page_source:
                     # print(test)
-                    return failed('16', 'wrong error msg')
+                    msg.append('wrong error msg')
+                    return failed('16', msg)
 
         if test['a'] != 0:
             event2 = event2.old
@@ -965,21 +954,21 @@ def test_17(ip, group_id, driver):
         return failed('17', msg)
     i = 0
     while True:
-        id_event = ut.find_element_id(driver, 'free-time-' + str(i), msg)
+        id_event = ut.find_element_id(driver, 'id_meeting_' + str(i), msg)
         if id_event is None:
+            msg.pop()
             break
         source = id_event.text
         if event.date in source and event.begin_time in source and event.end_time in source and str(event.capacity) in source:
+            msg.append('not deleted completely')
             return failed('17', msg)
         i += 1
 
     return passed('17')
 
 
-
-
 def test_18(ip, group_id, driver):
-    msg = ''
+    msg = []
     if not ut.connect(ip, driver, msg):
         return failed('18', msg)
     if not ut.check_navbar(False, driver, msg):
@@ -988,7 +977,6 @@ def test_18(ip, group_id, driver):
     event = Event(user_teacher)
     event.capacity = random.randint(2, 4)
     error_full = 'فرصت مورد نظر ظرفیت خالی ندارد'
-    valid = 'فرصت مورد نظر با موفقیت رزرو شد'
     if not user_teacher.signup(driver, msg, send_type=True):
         return failed('18', msg)
     if not event.create(driver, msg):
@@ -1026,7 +1014,7 @@ def test_18(ip, group_id, driver):
 
 
 def test_19(ip, group_id, driver):
-    msg = ''
+    msg = []
     if not ut.connect(ip, driver, msg):
         return failed('19', msg)
     if not ut.check_navbar(False, driver, msg):
@@ -1055,7 +1043,7 @@ def test_19(ip, group_id, driver):
         return failed('19', msg)
     found = []
     for i in range(cnt):
-        id_res = ut.find_element_id(driver, 'reserved-free-time-' + str(i), msg)
+        id_res = ut.find_element_id(driver, 'id_reserved_meeting_' + str(i), msg)
         if id_res is None:
             return failed('19', msg)
         source = id_res.text
@@ -1063,8 +1051,6 @@ def test_19(ip, group_id, driver):
             if event.user.first_name in source and event.user.last_name in source and event.date in source and event.begin_time in source and event.end_time in source:
                 found.append(event)
     if len(found) != len(events):
-        print(found)
-        print(events)
         return failed('19', msg)
     return passed('19')
 
@@ -1103,6 +1089,14 @@ def test_20(ip, group_id, driver):
     return passed('20')
 
 
+def find(driver, css_selector, msg):
+    element = ut.find_elements_by_id("data")
+    if element:
+        return element
+    else:
+        return False
+
+
 def test_21(ip, group_id, driver):
     msg = []
     if not ut.connect(ip, driver, msg):
@@ -1123,16 +1117,17 @@ def test_21(ip, group_id, driver):
         return failed('21', msg)
     if not user2.logout(driver, msg):
         return failed('21', msg)
-    id_search = ut.find_element_id(driver, 'search_profiles_input', msg)
+    id_search = ut.find_element_id(driver, 'id_search_profiles_input', msg)
     if id_search is None:
         return failed('21', msg)
     id_search.send_keys(user1.username)
     id_res = ut.find_element_id(driver, 'autocomplete_results', msg)
     # print(datetime.datetime.now().time())
-    time.sleep(1)
-    # submitted = WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#autocomplete_results a")))
-    # if submitted is None:
-    #     return failed('21', msg)
+    # time.sleep(1)
+    submitted = WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#autocomplete_results a")))
+    if submitted is None:
+        return failed('21', msg)
+    # print(submitted.text)
     # print(id_res.text)
     # print(help(id_res))
     # print(id_res.get_attribute('innerHTML'))
@@ -1149,18 +1144,23 @@ def test_21(ip, group_id, driver):
         # print(id_res.text)
         return failed('21', msg)
     if user1.first_name not in id_res.text or user1.last_name not in id_res.text:
-        print(1)
-        print(id_res.text)
-        print(user1.first_name)
-        print(user1.last_name)
+        # print(1)
+        # print(id_res.text)
+        # print(user1.first_name)
+        # print(user1.last_name)
         return failed('21', msg)
     id_link = ut.find_css_selector_element(id_res, 'a', msg)
     if id_link is None:
         return failed('21', msg)
-    print(id_link)
-    id_link.click()
+    # print(id_res.text)
+    # print(id_link)
+    # print(id_res.get_attribute('innerHTML'))
+    # print(help(id_link))
+    # print(id_link.get_property('href'))
+    submitted.click()
     source = driver.page_source
-    if user1.first_name not in source or user1.last_name in source:
+    if user1.first_name not in source or user1.last_name not in source:
+        # print(source)
         return failed('21', msg)
     return passed('21')
 
@@ -1267,8 +1267,8 @@ def test_25(ip, group_id, driver):
         return failed('25', msg)
     if not user.login(driver, msg):
         return failed('25', msg)
-    search_box = ut.find_css_selector_element(driver, 'id_search_profiles_input', msg)
-    search_button = ut.find_css_selector_element(driver, 'id_search_profiles_button', msg)
+    search_box = ut.find_element_id(driver, 'id_search_profiles_input', msg)
+    search_button = ut.find_element_id(driver, 'id_search_profiles_button', msg)
     if search_box is None or search_button is None:
         return failed('25', msg)
     search_box.send_keys(user.username)
@@ -1284,7 +1284,7 @@ def test_25(ip, group_id, driver):
     source = driver.page_source
     if user.first_name not in source or user.last_name not in source or user.username not in source:
         return failed('25', "incorrect or wrong user profile information")
-    return passed('2')
+    return passed('25')
 
 
 def test_26(ip, group_id, driver):

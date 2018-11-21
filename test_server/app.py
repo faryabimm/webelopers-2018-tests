@@ -153,8 +153,9 @@ def run_test(test_function, ip, group_id):
     print(1)
     driver = group_status[group_id]['driver']
     print(2)
-    utils.clear_cache(driver)
-    # driver.delete_all_cookies()
+    # utils.clear_cache(driver)
+    driver.get(ip)
+    driver.delete_all_cookies()
     print(3)
     result, string_output = test_function(
         ip, group_id, driver
