@@ -222,7 +222,7 @@ def test_6(ip, group_id, driver):
         return failed('6', msg)
     if not ut.connect("https://www.fastmail.com/login/", driver, msg):
         return failed('6', msg)
-    WebDriverWait(driver, 10).until(
+    WebDriverWait(driver, 20).until(
         EC.text_to_be_present_in_element((By.XPATH, "//*"), "Log In"))
     username_field = ut.find_element_name(driver, "username", msg)
     password_field = ut.find_element_name(driver, "password", msg)
@@ -232,13 +232,13 @@ def test_6(ip, group_id, driver):
     username_field.send_keys("ostadju@fastmail.com")
     password_field.send_keys("thegreatramz")
     login_button.click()
-    WebDriverWait(driver, 5).until(
+    WebDriverWait(driver, 10).until(
         EC.text_to_be_present_in_element((By.XPATH, "//*"), "No Conversation Selected"))
     title_link = ut.find_css_selector_element(driver, "div[title={}]".format(message.title), msg)
     if title_link is None:
         return failed('6', msg)
     title_link.click()
-    WebDriverWait(driver, 5).until(
+    WebDriverWait(driver, 10).until(
         EC.text_to_be_present_in_element((By.XPATH, "//*"), "Reply"))
     source = driver.page_source
     if message.text not in source or message.email not in source:
@@ -1117,8 +1117,8 @@ def test_21(ip, group_id, driver):
     id_search.send_keys(user1.username)
     id_res = ut.find_element_id(driver, 'autocomplete_results', msg)
     # print(datetime.datetime.now().time())
-    # time.sleep(1)
-    submitted = WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#autocomplete_results a")))
+    time.sleep(1)
+    #submitted = WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#autocomplete_results a")))
     if submitted is None:
         return failed('21', msg)
     # print(submitted.text)
@@ -1135,13 +1135,15 @@ def test_21(ip, group_id, driver):
     if id_res is None:
         return failed('21', msg)
     if user2.first_name in id_res.text and user2.last_name in id_res.text:
-        # print(id_res.text)
+        print(id_res.text)
+        msg.append('extra user found')
         return failed('21', msg)
     if user1.first_name not in id_res.text or user1.last_name not in id_res.text:
         # print(1)
         # print(id_res.text)
         # print(user1.first_name)
         # print(user1.last_name)
+        msg.append('user not found')
         return failed('21', msg)
     id_link = ut.find_css_selector_element(id_res, 'a', msg)
     if id_link is None:
