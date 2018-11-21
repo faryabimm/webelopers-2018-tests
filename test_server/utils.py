@@ -15,11 +15,12 @@ def connect(ip, driver, msg):
 
 # look_in: found element
 # look_for: wanted element id
-def find_element_id(look_in, look_for, msg):
+def find_element_id(look_in, look_for, msg, push_msg=True):
     try:
         return look_in.find_element_by_id(look_for)
     except:
-        msg.append("no element with id={} found".format(look_for))
+        if push_msg:
+            msg.append("no element with id={} found".format(look_for))
         return None
 
 

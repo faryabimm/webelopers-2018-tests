@@ -83,7 +83,7 @@ class User:
         if not ut.search(event.user.username, driver, msg):
             return False
 
-        id_profile = ut.find_element_id(driver, 'teacher0-username', msg)
+        id_profile = ut.find_css_selector_element(driver, '#id_teacher_0 a', msg)
         if id_profile is None:
             return False
         id_profile.click()
@@ -91,17 +91,19 @@ class User:
         i = 0
         id_reserve = None
         while True:
-            id_event = ut.find_element_id(driver, 'free-time-' + str(i), msg)
+            id_event = ut.find_element_id(driver, 'id_meeting_' + str(i), msg)
             if id_event is None:
+                msg.pop()
                 break
             source = id_event.text
             if event.date in source and event.begin_time in source and event.end_time in source and str(event.capacity) in source:
-                id_reserve = ut.find_element_id(id_event, 'reserve-free-time', msg)
+                id_reserve = ut.find_element_id(id_event, 'id_reserve_meeting', msg)
                 if id_reserve is None:
                     return False
                 break
             i += 1
         if id_reserve is None:
+            msg.append('meeting not found')
             return False
         id_reserve.click()
         return True
