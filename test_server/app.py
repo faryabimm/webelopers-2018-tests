@@ -149,11 +149,16 @@ def process_request(ip, group_id, test_order):
 
 @timeout(config.TEST_TIMEOUT_S, use_signals=False)
 def run_test(test_function, ip, group_id):
+    print(1)
     driver = group_status[group_id]['driver']
+    print(2)
     driver.delete_all_cookies()
+    print(3)
     result, string_output = test_function(
         ip, group_id, driver
     )
+    print(4)
+    print(result, string_output, 'HMM')
     return result, string_output, 'HMM'
 
 

@@ -1128,21 +1128,36 @@ def test_21(ip, group_id, driver):
         return failed('21', msg)
     id_search.send_keys(user1.username)
     id_res = ut.find_element_id(driver, 'autocomplete_results', msg)
-    print(datetime.datetime.now().time())
-    print(help(id_res))
-    print(datetime.datetime.now().time())
+    # print(datetime.datetime.now().time())
+    time.sleep(1)
+    # submitted = WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#autocomplete_results a")))
+    # if submitted is None:
+    #     return failed('21', msg)
+    # print(id_res.text)
+    # print(help(id_res))
+    # print(id_res.get_attribute('innerHTML'))
+    # print(id_res.)
+    # submitted = WebDriverWait(driver, 10).until(
+    #     EC.text_to_be_present_in_element((By.XPATH, "//*"), "درخواست شما ثبت شد"))
+    # if submitted is None:
+    #     return failed('5', "sending email took too long time")
+    # print(id_res.text)
+    # print(datetime.datetime.now().time())
     if id_res is None:
         return failed('21', msg)
     if user2.first_name in id_res.text and user2.last_name in id_res.text:
-        print(id_res.text)
+        # print(id_res.text)
         return failed('21', msg)
-    if user1.first_name not in id_res.text or user1.last_name in id_res.text:
+    if user1.first_name not in id_res.text or user1.last_name not in id_res.text:
         print(1)
         print(id_res.text)
+        print(user1.first_name)
+        print(user1.last_name)
         return failed('21', msg)
     id_link = ut.find_css_selector_element(id_res, 'a', msg)
     if id_link is None:
         return failed('21', msg)
+    print(id_link)
     id_link.click()
     source = driver.page_source
     if user1.first_name not in source or user1.last_name in source:
