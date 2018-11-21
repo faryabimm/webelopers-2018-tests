@@ -114,7 +114,7 @@ def random_email():
 
 
 def check_navbar(logged_in, driver, msg):
-    navbar = find_element_id(driver, "navbar", msg)
+    navbar = find_element_id(driver, "id_navbar", msg)
     if navbar is None:
         return False
     navbar_home = find_element_id(navbar, "id_navbar_home", msg)

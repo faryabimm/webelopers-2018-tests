@@ -31,14 +31,14 @@ class Event:
             self.user.logout(driver, msg)
             if not self.user.login(driver, msg):
                 return False
-        create_link = ut.find_element_id(driver, "navbar_new_free_time", msg)
+        create_link = ut.find_element_id(driver, "id_navbar_meeting", msg)
         if create_link is None:
             return False
         create_link.click()
-        id_date = ut.find_element_id(driver, "id_date", msg)
-        id_begin_time = ut.find_element_id(driver, "id_start", msg)
-        id_end_time = ut.find_element_id(driver, "id_end", msg)
-        id_capacity = ut.find_element_id(driver, "id_student_capacity", msg)
+        id_date = ut.find_element_id(driver, "id_meeting_date", msg)
+        id_begin_time = ut.find_element_id(driver, "id_meeting_start_time", msg)
+        id_end_time = ut.find_element_id(driver, "id_meeting_end_time", msg)
+        id_capacity = ut.find_element_id(driver, "id_meeting_student_capacity", msg)
         if id_begin_time is None or id_capacity is None or id_date is None or id_end_time is None:
             return False
         id_end_time.send_keys(self.end_time)
@@ -46,7 +46,7 @@ class Event:
         id_begin_time.send_keys(self.begin_time)
         id_capacity.send_keys(self.capacity)
 
-        id_submit = ut.find_element_id(driver, "form_submit", msg)
+        id_submit = ut.find_element_id(driver, "id_submit", msg)
         if id_submit is None:
             return False
         id_submit.click()
@@ -57,7 +57,7 @@ class Event:
             self.user.logout(driver, msg)
             if not self.user.login(driver, msg):
                 return False
-        id_profile = ut.find_element_id(driver, 'navbar_profile', msg)
+        id_profile = ut.find_element_id(driver, 'id_navbar_profile', msg)
         if id_profile is None:
             return False
         id_profile.click()
@@ -83,10 +83,10 @@ class Event:
         if id_change is None:
             return False
         id_change.click()
-        id_date = ut.find_element_id(driver, "id_date", msg)
-        id_begin_time = ut.find_element_id(driver, "id_start", msg)
-        id_end_time = ut.find_element_id(driver, "id_end", msg)
-        id_capacity = ut.find_element_id(driver, "id_student_capacity", msg)
+        id_date = ut.find_element_id(driver, "id_meeting_date", msg)
+        id_begin_time = ut.find_element_id(driver, "id_meeting_start_time", msg)
+        id_end_time = ut.find_element_id(driver, "id_meeting_end_time", msg)
+        id_capacity = ut.find_element_id(driver, "id_meeting_student_capacity", msg)
         if id_begin_time is None or id_capacity is None or id_date is None or id_end_time is None:
             return False
         id_end_time.clear()
@@ -98,7 +98,7 @@ class Event:
         id_capacity.clear()
         id_capacity.send_keys(self.capacity)
 
-        id_submit = ut.find_element_id(driver, "form_submit", msg)
+        id_submit = ut.find_element_id(driver, "id_submit", msg)
         if id_submit is None:
             return False
         id_submit.click()
@@ -109,7 +109,7 @@ class Event:
             self.user.logout(driver, msg)
             if not self.user.login(driver, msg):
                 return False
-        id_profile = ut.find_element_id(driver, 'navbar_profile', msg)
+        id_profile = ut.find_element_id(driver, 'id_navbar_profile', msg)
         if id_profile is None:
             return False
         id_profile.click()
@@ -130,7 +130,7 @@ class Event:
         if id_change is None:
             return False
         id_change.click()
-        id_remove = ut.find_element_id(driver, 'remove-free-time', msg)
+        id_remove = ut.find_element_id(driver, 'remove_meeting', msg)
         if id_remove is None:
             return False
         id_remove.click()

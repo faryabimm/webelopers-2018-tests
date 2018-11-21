@@ -116,7 +116,7 @@ class User:
                 break
             source = id_res.text
             if event.user.first_name in source and event.user.last_name in source and event.date in source and event.begin_time in source and event.end_time in source:
-                id_res = ut.find_element_id(driver, 'undo-reserver-free-time', msg)
+                id_res = ut.find_element_id(driver, "cancel_meeting", msg)
                 if id_res is None:
                     return False
                 id_res.click()

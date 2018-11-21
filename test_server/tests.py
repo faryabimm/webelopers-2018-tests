@@ -35,7 +35,7 @@ def test_1(ip, group_id, driver):
     if not ut.check_navbar(False, driver, msg):
         return failed('1', msg)
 
-    if "به سامانه استادجو خوش آمدید" not in driver.page_source
+    if "به سامانه استادجو خوش آمدید" not in driver.page_source:
         return failed('1', 'incorrect or not found welcome message')
 
     home_url = driver.current_url
@@ -206,8 +206,8 @@ def test_5(ip, group_id, driver):
     submitted = WebDriverWait(driver, 10).until(
         EC.text_to_be_present_in_element((By.XPATH, "//*"), "درخواست شما ثبت شد"))
     if submitted is None:
-        return failed('5', "sending email took too long time or failed somehow
-")
+        return failed('5', "sending email took too long time or failed somehow")
+
     return passed('5')
 
 
@@ -713,7 +713,7 @@ def test_22(ip, group_id, driver):
     username_field.send_keys("ostadju@fastmail.com")
     password_field.send_keys("thegreatramz")
     login_button.click()
-    WebDriverWait(driver, 10).until(
+    WebDriverWait(driver, 20).until(
         EC.text_to_be_present_in_element((By.XPATH, "//*"), user_1.username))
     title_link = ut.find_css_selector_element(driver, "div[title={}]".format(user_1.username), msg)
     if title_link is None:
@@ -730,11 +730,20 @@ def test_22(ip, group_id, driver):
         msg.append("reset is None")
         return failed('22', msg)
     print(reset.text)
+    driver.implicitly_wait(2)
     driver.get(reset.text)
+    
+    try:
+        WebDriverWait(driver, 3).until(EC.alert_is_present(), 'Timed out waiting for PA creation' + 'confirmation popup to appear.')
+        alert = driver.switch_to.alert
+        alert.accept()
+        print("alert accepted")
+    except:
+        print("no alert")
 
     pass1 = ut.find_element_id(driver, "id_password1", msg)
     pass2 = ut.find_element_id(driver, "id_password2", msg)
-    submit = ut.find_element_id(driver, "submit", msg)
+    submit = ut.find_element_id(driver, "id_submit", msg)
     if pass1 is None or pass2 is None or submit is None:
         return failed('22', msg)
     user_1.password = ut.random_string(10)
@@ -1289,10 +1298,14 @@ def test_26(ip, group_id, driver):
     if username_field is None:
         return failed('26', msg)
     username_field.send_keys(user_1.username)
-    submit = ut.find_element_id(driver, "id_remove_user", msg)
+#    submit = ut.find_element_id(driver, "id_remove_user", msg)
+#    if submit is None:
+#        return failed('26', msg)
+#    submit.click()
+    submit = driver.switchTo().alert()
     if submit is None:
-        return failed('26', msg)
-    submit.click()
+        return failed('26', "no remove user confirmation dialog displayed")
+    submit.accept()
     if not ut.login_to_django_admin(group_id, driver, ip, msg):
         return failed('26', msg)
     if ut.check_user_in_django_admin(ip, user_1, driver, msg):
