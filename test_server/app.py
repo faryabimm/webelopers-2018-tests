@@ -111,6 +111,7 @@ def worker_run_tests(ip, test_order, group_id):
                     driver = webdriver.Chrome(chrome_options=options)
                     test_result, string_output, stack_trace = run_test(test_function, ip, group_id)
                     driver.delete_all_cookies()
+                    utils.clear_cache(driver)
                     driver.close()
                 except TimeoutError:
                     test_result, string_output, stack_trace = False, 'timeout', 'timeout'

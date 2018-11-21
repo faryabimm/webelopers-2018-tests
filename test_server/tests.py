@@ -89,10 +89,14 @@ def test_3(ip, group_id, driver):
     login_error_message = "نام کاربری یا گذرواژه غلط است"
     if login_error_message in driver.page_source:
         return failed('3', 'no login message error shown')
+    if not ut.connect(ip, driver, msg):
+        return failed('3', msg)
     driver.delete_all_cookies()
     # checking wrong user
     if not ut.connect(ip, driver, msg):
         return failed('3', msg)
+    print(driver.page_source())
+    driver.delete_all_cookies()
     wrong_user = User()
     if not wrong_user.login(driver, msg):
         return failed('3', msg)
