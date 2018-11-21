@@ -546,9 +546,16 @@ def test_14(ip, group_id, driver):
         return failed('14', msg)
     # if driver.current_url != home_url or driver.page_source != home_source:
     #     return failed('14', 'redirect to home after creation failed')
+
+
+
+    #todo
+    ##################
     ut.login_to_django_admin(group_id=group_id, driver=driver, ip=ip, msg=msg)
     if not ut.check_event_in_django_admin(ip, event, driver, msg):
         return failed('14', msg)
+    ##################
+
     driver.get(ip)
     # if not user.logout(driver, msg):
     #     return failed('14', msg)
@@ -802,9 +809,14 @@ def test_16(ip, group_id, driver):
         return failed('16', msg)
     # if driver.current_url != home_url or driver.page_source != home_source:
     #     return failed('16', 'redirect to home after creation failed')
+
+    #todo maybe removed
+    ####################
     ut.login_to_django_admin(group_id=group_id, driver=driver, ip=ip, msg=msg)
     if not ut.check_event_in_django_admin(ip, event, driver, msg):
         return failed('16', msg)
+    ####################
+
     driver.get(ip)
     # if not user.logout(driver, msg):
     #     return failed('14', msg)
@@ -921,6 +933,37 @@ def test_16(ip, group_id, driver):
         #     return failed('14', msg)
 
     return passed('16')
+
+
+def test_17(ip, group_id, driver):
+    msg = []
+    user = User([False])
+    event = Event(user)
+    if not ut.connect(ip, driver, msg):
+        return failed('17', msg)
+    if not ut.check_navbar(False, driver, msg):
+        return failed('17', msg)
+    if not user.signup(driver, msg, send_type=True):
+        return failed('17', msg)
+    if not event.create(driver, msg):
+        return failed('17', msg)
+    if not event.delete(driver, msg, False):
+        return failed('17', msg)
+    if not user.go_to_profile(driver, msg):
+        return failed('17', msg)
+    i = 0
+    while True:
+        id_event = ut.find_element_id(driver, 'free-time-' + str(i), msg)
+        if id_event is None:
+            break
+        source = id_event.text
+        if event.date in source and event.begin_time in source and event.end_time in source and str(event.capacity) in source:
+            return failed('17', msg)
+        i += 1
+
+    return passed('17')
+
+
 
 
 def test_18(ip, group_id, driver):
