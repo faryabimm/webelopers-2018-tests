@@ -64,13 +64,13 @@ def handle_request():
     group_id = request_data['group_id']
 
     if test_and_set_active(group_id):
-        logger.log_info('lock acquired for team "{}" with group_id {}'.format(team_names[group_id], group_id))
+        logger.log_info('lock acquired for team "{}" with group_id {}'.format(team_names[int(group_id)], group_id))
         ip = 'http://{}:{}'.format(request_data['ip'], request_data['port'])
         test_order = None
         if 'test_order' in request_data:
             test_order = literal_eval(request_data['test_order'])
             logger.log_info(
-                'custom test order {} was given for team "{}" with group_id {}'.format(test_order, team_names[group_id],
+                'custom test order {} was given for team "{}" with group_id {}'.format(test_order, team_names[int(group_id)],
                                                                                        group_id))
 
             if type(test_order) == int:
@@ -78,11 +78,11 @@ def handle_request():
 
         process_request(ip, group_id, test_order)
         logger.log_success(
-            'test for team "{}" with group_id {} initiated successfully'.format(team_names[group_id], group_id))
+            'test for team "{}" with group_id {} initiated successfully'.format(team_names[int(group_id)], group_id))
         return "success - test initiated"
     else:
         logger.log_error(
-            'another test for team "{}" with group_id {} is in progress'.format(team_names[group_id], group_id))
+            'another test for team "{}" with group_id {} is in progress'.format(team_names[int(group_id)], group_id))
         return "error - existing test in progress", 406
 
 
@@ -150,16 +150,16 @@ def worker_run_tests(ip, test_order, group_id):
 
 def worker_function(ip, group_id, test_order):
     logger.log_info(
-        'running tests for team "{}" with group_id {} on ip address {}'.format(team_names[group_id], group_id, ip))
+        'running tests for team "{}" with group_id {} on ip address {}'.format(team_names[int(group_id)], group_id, ip))
     test_results = worker_run_tests(ip, test_order, group_id)
-    logger.log_info('releasing lock for team "{}" with group_id {}'.format(team_names[group_id], group_id))
+    logger.log_info('releasing lock for team "{}" with group_id {}'.format(team_names[int(group_id)], group_id))
     deactivate_status(group_id)
     logger.log_info(
         'reporting test results for team "{}" with group_id {} on ip address {} to competition server'.format(
-            team_names[group_id], group_id, ip))
+            team_names[int(group_id)], group_id, ip))
     report_test_results(group_id, test_results)
     logger.log_success(
-        'test for team "{}" with group_id {} finished successfully'.format(team_names[group_id], group_id))
+        'test for team "{}" with group_id {} finished successfully'.format(team_names[int(group_id)], group_id))
 
 
 def report_test_results(group_id, test_results):
