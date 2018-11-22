@@ -10,6 +10,7 @@ class User:
         self.email = ut.random_email()
         self.password = ut.random_string(10)
         self.is_student = random.choice(valid_is_students)
+        print(self.__dict__)
 
     def signup(self, driver, msg, send_mismatched_password=False, send_type=True):
         ut.find_element_id(driver, "id_navbar_signup", msg).click()

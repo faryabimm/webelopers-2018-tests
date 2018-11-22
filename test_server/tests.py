@@ -56,7 +56,7 @@ def test_2(ip, group_id, driver):
         return failed('2', msg)
     ut.login_to_django_admin(group_id=group_id, driver=driver, ip=ip, msg=msg)
     if not ut.check_user_in_django_admin(ip, user, driver, msg):
-        msg.append("line 59 call a staff, maybe superuser with admin and password=passomass not set or not using django\'s defualt User model")
+        msg.append("line 59 call a staff, maybe superuser with admin and password=passomass not set or not using django\'s defualt User model or you are EZed")
         return failed('2', msg)
 
     return passed('2')
