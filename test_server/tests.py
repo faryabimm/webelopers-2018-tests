@@ -1,23 +1,19 @@
-import filecmp
-import os
-import urllib.request
-import numpy
-from markdown import markdown
-
-import utils as ut
-from PIL import Image, ImageChops
-from User import User
-from Event import Event
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-
-from ContactMessage import ContactMessage
-
-import random
 import json
+import os
+import random
 import time
-import datetime
+import urllib.request
+
+import numpy
+import utils as ut
+from ContactMessage import ContactMessage
+from Event import Event
+from PIL import Image
+from User import User
+from markdown import markdown
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.wait import WebDriverWait
 
 
 def failed(test, message):
@@ -41,7 +37,7 @@ def test_1(ip, group_id, driver):
     home_url = driver.current_url
     home_source = driver.page_source
     ut.find_element_id(driver, "id_navbar_home", msg).click()
-    if ْ"به سامانه استادجو خوش"not in driver.page_source:
+    if "به سامانه استادجو خوش" not in driver.page_source:
         return failed('1', "incorrect or not found welcome message")
 
     return passed('1')
@@ -118,7 +114,6 @@ def test_4(ip, group_id, driver):
     email_exists = "کاربری با ایمیل وارد شده وجود دارد"
     password_mismatch = "گذرواژه و تکرار گذرواژه یکسان نیستند"
 
-
     # all correct
     user_1 = User()
     if not user_1.signup(driver, msg, send_type=False):
@@ -173,7 +168,7 @@ def submit_contact_us(ip, group_id, driver, msg):
         return None
     navbar = ut.find_element_id(driver, "id_navbar", msg)
     if navbar is None:
-        return None 
+        return None
     contact_us = ut.find_element_id(navbar, "id_navbar_contact_us", msg)
     if contact_us is None:
         return None
@@ -389,7 +384,7 @@ def test_11(ip, group_id, driver):
     submit = ut.find_element_id(driver, "id_submit", msg)
     if pic_upload is None or submit is None:
         return failed('11', msg)
-    imarray = numpy.random.rand(100,100,3) * 255
+    imarray = numpy.random.rand(100, 100, 3) * 255
     im = Image.fromarray(imarray.astype('uint8')).convert('RGBA')
     im.save('sour.png')
     path = pic_upload.send_keys(os.path.abspath('sour.png'))
@@ -409,17 +404,17 @@ def test_11(ip, group_id, driver):
 
 def test_12(ip, group_id, driver):
     simple = [["{}\n="],
-                ["# {}"],
-                ["## {}"],
-                ["### {}"],
-                ["#### {}"],
-                ["##### {}"],
-                ["###### {}"],
-                ["`{}`"],
-                ["*_{}__"],
-                ["_{}*"]]
+              ["# {}"],
+              ["## {}"],
+              ["### {}"],
+              ["#### {}"],
+              ["##### {}"],
+              ["###### {}"],
+              ["`{}`"],
+              ["*_{}__"],
+              ["_{}*"]]
     lists = [["* {}"],
-                ["1. {}"]]
+             ["1. {}"]]
     sn = numpy.random.permutation(10)
     s, text = [], ""
     for i in range(10):
@@ -557,9 +552,7 @@ def test_14(ip, group_id, driver):
     if not event.create(driver, msg):
         return failed('14', msg)
 
-
-
-    #todo
+    # todo
     ##################
     ut.login_to_django_admin(group_id=group_id, driver=driver, ip=ip, msg=msg)
     if not ut.check_event_in_django_admin(ip, event, driver, msg):
@@ -571,9 +564,6 @@ def test_14(ip, group_id, driver):
     #     return failed('14', msg)
     #
     # TODO check errors
-
-
-
 
     error_conflict = 'بازه زمانی انتخاب شده با فرصت های قبلی شما اشتراک دارد'
     error_begin_end = 'زمان شروع باید قبل از زمان پایان فرصت باشد'
@@ -594,13 +584,15 @@ def test_14(ip, group_id, driver):
     invalid_second = random.randint(61, 80)
     invalid_hour = random.randint(24, 30)
     invalid_time1 = time.strftime('%H:%M:', ut.random_date_time()) + str(invalid_second)
-    invalid_time2 = time.strftime('%H:', ut.random_date_time()) + str(invalid_second) + time.strftime(':%S', ut.random_date_time())
+    invalid_time2 = time.strftime('%H:', ut.random_date_time()) + str(invalid_second) + time.strftime(':%S',
+                                                                                                      ut.random_date_time())
     invalid_time3 = str(invalid_hour) + time.strftime(':%M:%S', ut.random_date_time())
     invalid_time4 = ut.random_string(8)
     invalid_day = random.randint(32, 40)
     invalid_month = random.randint(13, 20)
     invalid_date1 = time.strftime('%Y-%m-', ut.random_date_time()) + str(invalid_day)
-    invalid_date2 = time.strftime('%Y-', ut.random_date_time()) + str(invalid_month) + time.strftime('-%d', ut.random_date_time())
+    invalid_date2 = time.strftime('%Y-', ut.random_date_time()) + str(invalid_month) + time.strftime('-%d',
+                                                                                                     ut.random_date_time())
     invalid_date3 = ut.random_string(10)
 
     dates = [date1, date2, invalid_date1, invalid_date2, invalid_date3]
@@ -689,7 +681,7 @@ def test_22(ip, group_id, driver):
     if submit is None:
         return failed('22', msg)
     submit.click()
-    if "کاربری با ایمیل داده شده وجود ندار"not in driver.page_source:
+    if "کاربری با ایمیل داده شده وجود ندار" not in driver.page_source:
         return failed('22', "wrong email entered and there's no error")
     user_1 = User()
     user_1.email = "ostadju@fastmail.com"
@@ -712,7 +704,7 @@ def test_22(ip, group_id, driver):
     if submit is None:
         return failed('22', msg)
     submit.click()
-    if "کﺍﺮﺑﺭی ﺏﺍ ﺍیﻡیﻝ ﺩﺍﺪﻫ ﺵﺪﻫ ﻮﺟﻭﺩ ﻥﺩﺍﺭ"in driver.page_source:
+    if "کﺍﺮﺑﺭی ﺏﺍ ﺍیﻡیﻝ ﺩﺍﺪﻫ ﺵﺪﻫ ﻮﺟﻭﺩ ﻥﺩﺍﺭ" in driver.page_source:
         return failed('22', "correct email entered and there's an error message")
     if not ut.connect("https://www.fastmail.com/login/", driver, msg):
         return failed('22', msg)
@@ -745,9 +737,10 @@ def test_22(ip, group_id, driver):
     print(reset.text)
     driver.implicitly_wait(2)
     driver.get(reset.text)
-    
+
     try:
-        WebDriverWait(driver, 3).until(EC.alert_is_present(), 'Timed out waiting for PA creation' + 'confirmation popup to appear.')
+        WebDriverWait(driver, 3).until(EC.alert_is_present(),
+                                       'Timed out waiting for PA creation' + 'confirmation popup to appear.')
         alert = driver.switch_to.alert
         alert.accept()
         print("alert accepted")
@@ -767,8 +760,8 @@ def test_22(ip, group_id, driver):
         return failed('22', "after password change cant login")
     test_26(ip, group_id, driver)
     return passed('22')
- 
-    
+
+
 def test_15(ip, group_id, driver):
     msg = []
     user1 = User([False])
@@ -806,7 +799,7 @@ def test_16(ip, group_id, driver):
     if not event.save(driver, msg, logout_login=False):
         return failed('16', msg)
 
-    #todo maybe removed
+    # todo maybe removed
     ####################
     ut.login_to_django_admin(group_id=group_id, driver=driver, ip=ip, msg=msg)
     if not ut.check_event_in_django_admin(ip, event, driver, msg):
@@ -818,9 +811,6 @@ def test_16(ip, group_id, driver):
     #     return failed('14', msg)
     #
     # TODO check errors
-
-
-
 
     error_conflict = 'بازه زمانی انتخاب شده با فرصت های قبلی شما اشتراک دارد'
     error_begin_end = 'زمان شروع باید قبل از زمان پایان فرصت باشد'
@@ -846,29 +836,32 @@ def test_16(ip, group_id, driver):
     invalid_second = random.randint(61, 80)
     invalid_hour = random.randint(24, 30)
     invalid_time1 = time.strftime('%H:%M:', ut.random_date_time()) + str(invalid_second)
-    invalid_time2 = time.strftime('%H:', ut.random_date_time()) + str(invalid_second) + time.strftime(':%S', ut.random_date_time())
+    invalid_time2 = time.strftime('%H:', ut.random_date_time()) + str(invalid_second) + time.strftime(':%S',
+                                                                                                      ut.random_date_time())
     invalid_time3 = str(invalid_hour) + time.strftime(':%M:%S', ut.random_date_time())
     invalid_time4 = ut.random_string(8)
     invalid_day = random.randint(32, 40)
     invalid_month = random.randint(13, 20)
     invalid_date1 = time.strftime('%Y-%m-', ut.random_date_time()) + str(invalid_day)
-    invalid_date2 = time.strftime('%Y-', ut.random_date_time()) + str(invalid_month) + time.strftime('-%d', ut.random_date_time())
+    invalid_date2 = time.strftime('%Y-', ut.random_date_time()) + str(invalid_month) + time.strftime('-%d',
+                                                                                                     ut.random_date_time())
     invalid_date3 = ut.random_string(10)
 
     dates = [date1, date2, invalid_date1, invalid_date2, invalid_date3]
     times = [time1, time2, time3, time4, invalid_time1, invalid_time2, invalid_time3, invalid_time4, time5, time6]
-    errors = [None, error_conflict, error_begin_end, error_invalid_begin, error_invalid_end, error_invalid_date, error_capacity]
+    errors = [None, error_conflict, error_begin_end, error_invalid_begin, error_invalid_end, error_invalid_date,
+              error_capacity]
 
     print(dates)
     print(times)
     print(errors)
 
     test_cases = [{'d1': 0, 'd2': 0, 'b1': 0, 'e1': 3, 'b2': 1, 'e2': 2, 'd3': 0, 'b3': 8, 'e3': 9, 'a': 1, 'n': True},
-                  {'d1': 0, 'd2': 0, 'b1': 0, 'e1': 2, 'b2': 1, 'e2': 3, 'd3': 0, 'b3': 8, 'e3': 9,  'a': 1, 'n': True},
-                  {'d1': 0, 'd2': 0, 'b1': 1, 'e1': 2, 'b2': 0, 'e2': 3, 'd3': 0, 'b3': 8, 'e3': 9,  'a': 1, 'n': True},
-                  {'d1': 0, 'd2': 0, 'b1': 1, 'e1': 3, 'b2': 0, 'e2': 2, 'd3': 0, 'b3': 8, 'e3': 9,  'a': 1, 'n': True},
-                  {'d1': 0, 'd2': 1, 'b1': 1, 'e1': 3, 'b2': 0, 'e2': 2, 'd3': 0, 'b3': 8, 'e3': 9,  'a': 0, 'n': True},
-                  {'d1': 0, 'd2': 1, 'b1': 1, 'e1': 3, 'b2': 2, 'e2': 0, 'd3': 0, 'b3': 8, 'e3': 9,  'a': 2, 'n': True},
+                  {'d1': 0, 'd2': 0, 'b1': 0, 'e1': 2, 'b2': 1, 'e2': 3, 'd3': 0, 'b3': 8, 'e3': 9, 'a': 1, 'n': True},
+                  {'d1': 0, 'd2': 0, 'b1': 1, 'e1': 2, 'b2': 0, 'e2': 3, 'd3': 0, 'b3': 8, 'e3': 9, 'a': 1, 'n': True},
+                  {'d1': 0, 'd2': 0, 'b1': 1, 'e1': 3, 'b2': 0, 'e2': 2, 'd3': 0, 'b3': 8, 'e3': 9, 'a': 1, 'n': True},
+                  {'d1': 0, 'd2': 1, 'b1': 1, 'e1': 3, 'b2': 0, 'e2': 2, 'd3': 0, 'b3': 8, 'e3': 9, 'a': 0, 'n': True},
+                  {'d1': 0, 'd2': 1, 'b1': 1, 'e1': 3, 'b2': 2, 'e2': 0, 'd3': 0, 'b3': 8, 'e3': 9, 'a': 2, 'n': True},
                   {'d1': 'x', 'd2': 1, 'b2': 4, 'e2': 0, 'd3': 'x', 'a': 3, 'n': False},
                   {'d1': 'x', 'd2': 1, 'b2': 5, 'e2': 0, 'd3': 'x', 'a': 3, 'n': False},
                   {'d1': 'x', 'd2': 1, 'b2': 6, 'e2': 0, 'd3': 'x', 'a': 3, 'n': False},
@@ -964,7 +957,8 @@ def test_17(ip, group_id, driver):
             msg.pop()
             break
         source = id_event.text
-        if event.date in source and event.begin_time in source and event.end_time in source and str(event.capacity) in source:
+        if event.date in source and event.begin_time in source and event.end_time in source and str(
+                event.capacity) in source:
             msg.append('not deleted completely')
             return failed('17', msg)
         i += 1
@@ -1000,7 +994,7 @@ def test_18(ip, group_id, driver):
             if error_full not in driver.page_source:
                 return failed('18', msg)
 
-        #todo maybe replaces with
+        # todo maybe replaces with
         ##################
         else:
             ut.login_to_django_admin(group_id=group_id, driver=driver, ip=ip, msg=msg)
@@ -1129,10 +1123,11 @@ def test_21(ip, group_id, driver):
     id_res = ut.find_element_id(driver, 'autocomplete_results', msg)
     # print(datetime.datetime.now().time())
     time.sleep(1)
-    #submitted = WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#autocomplete_results a")))
+    # submitted = WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#autocomplete_results a")))
     # time.sleep(1)
     # EC.number_of_windows_to_be
-    submitted = WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#autocomplete_results a")))
+    submitted = WebDriverWait(driver, 10).until(
+        EC.visibility_of_element_located((By.CSS_SELECTOR, "#autocomplete_results a")))
     if submitted is None:
         return failed('21', msg)
     # print(submitted.text)
@@ -1170,8 +1165,8 @@ def test_21(ip, group_id, driver):
     # submitted.click()
     # source = driver.page_source
     # if user1.first_name not in source or user1.last_name not in source:
-        # print(source)
-        # return failed('21', msg)
+    # print(source)
+    # return failed('21', msg)
     return passed('21')
 
 
@@ -1193,7 +1188,7 @@ def test_23(ip, group_id, driver):
             msg.append('redirect to home after signup failed')
             return failed('23', msg)
 
-        #todo REMOVE THESE LINES
+        # todo REMOVE THESE LINES
         #########################
         if not user.login(driver, msg):
             return failed('23', msg)
@@ -1327,10 +1322,10 @@ def test_26(ip, group_id, driver):
     if username_field is None:
         return failed('26', msg)
     username_field.send_keys(user_1.username)
-#    submit = ut.find_element_id(driver, "id_remove_user", msg)
-#    if submit is None:
-#        return failed('26', msg)
-#    submit.click()
+    #    submit = ut.find_element_id(driver, "id_remove_user", msg)
+    #    if submit is None:
+    #        return failed('26', msg)
+    #    submit.click()
     submit = driver.switchTo().alert()
     if submit is None:
         return failed('26', "no remove user confirmation dialog displayed")
@@ -1340,4 +1335,3 @@ def test_26(ip, group_id, driver):
     if ut.check_user_in_django_admin(ip, user_1, driver, msg):
         return failed('26', "user has not been removed")
     return passed('26')
-
