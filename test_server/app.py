@@ -11,7 +11,7 @@ import requests
 import tests
 import utils
 from flask import Flask, request
-from selenium import webdriver
+from selenium import webdriverلف
 from selenium.webdriver.firefox.options import Options
 from timeout_decorator import timeout, TimeoutError
 
@@ -102,7 +102,6 @@ def worker_run_tests(ip, test_order, group_id):
         return test_results
 
     if test_order is not None:
-        # print(test_order)
         for test_id in test_order:
             test_name = 'test_{}'.format(test_id)
             test_function = getattr(tests, test_name)
@@ -175,7 +174,6 @@ def run_test(test_function, ip, group_id):
         ip, group_id, driver
     )
 
-    # print(result, string_output, 'HMM')
     return result, string_output, 'HMM'
 
 
