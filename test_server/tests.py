@@ -225,6 +225,9 @@ def test_6(ip, group_id, driver):
         username_field.send_keys("ostadju@fastmail.com")
         password_field.send_keys("thegreatramz")
         login_button.click()
+        if not ut.connect("https://www.fastmail.com/mail/Inbox"):
+            msg.append("connection to fastmail failed call a staff NOW")
+            return failed('6', msg)
         WebDriverWait(driver, 10).until(
             EC.text_to_be_present_in_element((By.XPATH, "//*"), "No Conversation Selected"))
         title_link = ut.find_css_selector_element(driver, "div[title={}]".format(message.title), msg)
