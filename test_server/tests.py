@@ -282,8 +282,8 @@ def create_user_goto_profile(ip, group_id, driver, msg):
     if not user_1.login(driver, msg):
         return None
     profile = ut.find_element_id(driver, "id_navbar_profile", msg)
-    if profile is not None:
-        msg.append("profile link visible on navbar before login")
+    if profile is None:
+        msg.append("profile link not found on navbar after login")
         return None
     profile = ut.find_element_id(driver, "id_navbar_profile", msg)
     if profile is None:
