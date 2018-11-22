@@ -320,6 +320,8 @@ def test_9(ip, group_id, driver):
         return failed('9', msg)
     first_name = ut.random_string(15)
     last_name = ut.random_string(15)
+    field_first_name.clear()
+    field_last_name.clear()
     field_first_name.send_keys(first_name)
     field_last_name.send_keys(last_name)
     submit_button.click()
