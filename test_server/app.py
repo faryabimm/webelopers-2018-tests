@@ -1,3 +1,4 @@
+import pickle as pk
 import sys
 from ast import literal_eval
 from datetime import datetime, timedelta
@@ -11,7 +12,7 @@ import requests
 import tests
 import utils
 from flask import Flask, request
-from selenium import webdriverلف
+from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from timeout_decorator import timeout, TimeoutError
 
@@ -21,6 +22,9 @@ driver_options = Options()
 driver_options.headless = True
 
 group_status = {}
+
+with open('team_id_name_data.PyData', mode='rb') as read_file:
+    team_names = pk.load(read_file)
 
 
 def test_and_set_active(group_id):
@@ -60,20 +64,25 @@ def handle_request():
     group_id = request_data['group_id']
 
     if test_and_set_active(group_id):
-        logger.log_info('lock acquired for group_id', group_id)
+        logger.log_info('lock acquired for team "{}" with group_id {}'.format(team_names[group_id], group_id))
         ip = 'http://{}:{}'.format(request_data['ip'], request_data['port'])
         test_order = None
         if 'test_order' in request_data:
-            logger.log_info('custom test order was given for group_id', group_id)
             test_order = literal_eval(request_data['test_order'])
+            logger.log_info(
+                'custom test order {} was given for team "{}" with group_id {}'.format(test_order, team_names[group_id],
+                                                                                       group_id))
+
             if type(test_order) == int:
                 test_order = [test_order]
 
         process_request(ip, group_id, test_order)
-        logger.log_success('test for group_id', group_id, 'initiated successfully')
+        logger.log_success(
+            'test for team "{}" with group_id {} initiated successfully'.format(team_names[group_id], group_id))
         return "success - test initiated"
     else:
-        logger.log_error('another test for group_id', group_id, 'is in progress')
+        logger.log_error(
+            'another test for team "{}" with group_id {} is in progress'.format(team_names[group_id], group_id))
         return "error - existing test in progress", 406
 
 
@@ -140,13 +149,17 @@ def worker_run_tests(ip, test_order, group_id):
 
 
 def worker_function(ip, group_id, test_order):
-    logger.log_info('running tests for group_id', group_id, 'on ip address', ip)
+    logger.log_info(
+        'running tests for team "{}" with group_id {} on ip address {}'.format(team_names[group_id], group_id, ip))
     test_results = worker_run_tests(ip, test_order, group_id)
-    logger.log_info('releasing lock for group_id', group_id)
+    logger.log_info('releasing lock for team "{}" with group_id {}'.format(team_names[group_id], group_id))
     deactivate_status(group_id)
-    logger.log_info('reporting test results for group_id', group_id, 'on ip address', ip, 'to competition server')
+    logger.log_info(
+        'reporting test results for team "{}" with group_id {} on ip address {} to competition server'.format(
+            team_names[group_id], group_id, ip))
     report_test_results(group_id, test_results)
-    logger.log_success('test for group_id', group_id, 'finished successfully')
+    logger.log_success(
+        'test for team "{}" with group_id {} finished successfully'.format(team_names[group_id], group_id))
 
 
 def report_test_results(group_id, test_results):
