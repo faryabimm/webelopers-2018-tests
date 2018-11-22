@@ -8,14 +8,14 @@ options = webdriver.ChromeOptions()
 #options.add_argument('headless')
 driver = webdriver.Chrome(chrome_options=options)
 # driver = webdriver.Firefox()
-ip = "http://192.168.197.154:8000"
-for i in [7]:
+ip = "http://192.168.205.114:8000"
+for i in [8]:
     # if i not in [21]:
     #     continue
     test = getattr(tests, ('test_' + str(i)))
     print(test(ip, "2", driver))
-    driver.get(ip)
-    driver.delete_all_cookies()
+    # driver.get(ip)
+    # driver.delete_all_cookies()
 # driver.close()
 print(datetime.datetime.now().time())
 
