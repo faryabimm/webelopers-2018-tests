@@ -153,7 +153,7 @@ def test_4(ip, group_id, driver):
         return failed('4', msg)
     ut.login_to_django_admin(group_id=group_id, driver=driver, ip=ip, msg=msg)
     if not ut.check_user_in_django_admin(ip, user_1, driver, msg):
-        msg.append("ADD THAT FUCKING ADMIN, PASSOMASS TO YOUR DJANGO ADMINS")
+        msg.append("ADD THAT FUCKING ADMIN, PASSOMASS TO YOUR DJANGO ADMINS AND PLEASE SET THE LANG TO en-US")
         return failed('4', msg)
     if ut.check_user_in_django_admin(ip, user_2, driver, msg):
         return failed('4', msg)
@@ -181,9 +181,6 @@ def submit_contact_us(ip, group_id, driver, msg):
     text_field = ut.find_element_id(driver, "id_text", msg)
     submit_button = ut.find_element_id(driver, "id_submit", msg)
     if title_field is None or email_field is None or text_field is None or submit_button is None:
-        return None
-    if title_field.get_attribute("maxlength") != "40":
-        msg.append("title field maxlength is not 40")
         return None
     if email_field.get_attribute("type") != "email":
         msg.append("email field type is not email")
