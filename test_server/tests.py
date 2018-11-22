@@ -112,10 +112,11 @@ def test_4(ip, group_id, driver):
     user_exists = "نام کاربری"
     email_exists = "ایمیل"
     password_mismatch = "یکسان"
-
     # all correct
     user_1 = User()
     if not user_1.signup(driver, msg, send_type=False):
+        return failed('4', msg)
+    if not ut.connect(ip, driver, msg):
         return failed('4', msg)
     source_1 = driver.page_source
     if user_exists in source_1 or password_mismatch in source_1 or email_exists in source_1:
@@ -145,6 +146,7 @@ def test_4(ip, group_id, driver):
     # password mismatch error
     user_4 = User()
     user_4.signup(driver, msg, send_mismatched_password=True, send_type=False)
+    
     source_4 = driver.page_source
     if user_exists in source_4 or password_mismatch not in source_4 or email_exists in source_4:
         return failed('4', msg)
