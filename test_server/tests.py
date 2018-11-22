@@ -56,7 +56,7 @@ def test_2(ip, group_id, driver):
         return failed('2', msg)
     ut.login_to_django_admin(group_id=group_id, driver=driver, ip=ip, msg=msg)
     if not ut.check_user_in_django_admin(ip, user, driver, msg):
-        msg.append("line 59 call a staff")
+        msg.append("line 59 call a staff, maybe superuser with admin and password=passomass not set or not using django\'s defualt User model")
         return failed('2', msg)
 
     return passed('2')
@@ -119,7 +119,7 @@ def test_4(ip, group_id, driver):
     if not ut.connect(ip, driver, msg):
         return failed('4', msg)
     source_1 = driver.page_source
-    if user_exists in source_1 or password_mismatch in source_1 or email_exists in source_1:
+    if user_exists in source_1:
         return failed('4', error_msg)
     driver.delete_all_cookies()
 
@@ -128,7 +128,7 @@ def test_4(ip, group_id, driver):
     user_2.username = user_1.username
     user_2.signup(driver, msg, send_type=False)
     source_2 = driver.page_source
-    if user_exists not in source_2 or password_mismatch in source_2 or email_exists in source_2:
+    if user_exists not in source_2:
         msg.append("wrong error messages shown in signup errors")
         return failed('4', msg)
     driver.delete_all_cookies()
@@ -138,7 +138,7 @@ def test_4(ip, group_id, driver):
     user_3.email = user_1.email
     user_3.signup(driver, msg, send_type=False)
     source_3 = driver.page_source
-    if user_exists in source_3 or password_mismatch in source_3 or email_exists not in source_3:
+    if email_exists not in source_3:
         msg.append("wrong error messages shown in signup errors")
         return failed('4', msg)
     driver.delete_all_cookies()
@@ -148,10 +148,12 @@ def test_4(ip, group_id, driver):
     user_4.signup(driver, msg, send_mismatched_password=True, send_type=False)
     
     source_4 = driver.page_source
-    if user_exists in source_4 or password_mismatch not in source_4 or email_exists in source_4:
+    if password_mismatch not in source_4:
+        msg.append("password mismatch")
         return failed('4', msg)
     ut.login_to_django_admin(group_id=group_id, driver=driver, ip=ip, msg=msg)
     if not ut.check_user_in_django_admin(ip, user_1, driver, msg):
+        msg.append("ADD THAT FUCKING ADMIN, PASSOMASS TO YOUR DJANGO ADMINS")
         return failed('4', msg)
     if ut.check_user_in_django_admin(ip, user_2, driver, msg):
         return failed('4', msg)
@@ -185,9 +187,6 @@ def submit_contact_us(ip, group_id, driver, msg):
         return None
     if email_field.get_attribute("type") != "email":
         msg.append("email field type is not email")
-        return None
-    if text_field.get_attribute("minlength") != "10" or text_field.get_attribute("maxlength") != "250":
-        msg.append("text field min length is not 10 or max length is not 250")
         return None
     message = ContactMessage()
     title_field.send_keys(message.title)
@@ -1334,6 +1333,6 @@ def test_26(ip, group_id, driver):
     submit.accept()
     if not ut.login_to_django_admin(group_id, driver, ip, msg):
         return failed('26', msg)
-    if ut.check_user_in_django_admin(ip, user_1, driver, msg):
+    if ut.check_user_in_django_admin(ip,user_1, driver, msg):
         return failed('26', "user has not been removed")
     return passed('26')
