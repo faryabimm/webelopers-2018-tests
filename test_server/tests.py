@@ -54,10 +54,9 @@ def test_2(ip, group_id, driver):
     home_source = driver.page_source
     if not user.signup(driver, msg, send_type=False):
         return failed('2', msg)
-    if driver.current_url != home_url or driver.page_source != home_source:
-        return failed('2', 'redirect to home after signup failed')
     ut.login_to_django_admin(group_id=group_id, driver=driver, ip=ip, msg=msg)
     if not ut.check_user_in_django_admin(ip, user, driver, msg):
+        msg.append("line 59 call a staff, maybe superuser with admin and password=passomass not set or not using django\'s defualt User model")
         return failed('2', msg)
 
     return passed('2')
@@ -82,7 +81,7 @@ def test_3(ip, group_id, driver):
     # checking right user
     if not ut.check_navbar(True, driver, msg):
         return failed('3', msg)
-    login_error_message = "نام کاربری یا گذرواژه غلط است"
+    login_error_message = "نام کاربری"
     if login_error_message in driver.page_source:
         return failed('3', 'no login message error shown')
     if not ut.connect(ip, driver, msg):
@@ -110,25 +109,26 @@ def test_4(ip, group_id, driver):
         return failed('4', msg)
     if not ut.check_navbar(False, driver, msg):
         return failed('4', msg)
-    user_exists = "کاربری با نام کاربری وارد شده وجود دارد"
-    email_exists = "کاربری با ایمیل وارد شده وجود دارد"
-    password_mismatch = "گذرواژه و تکرار گذرواژه یکسان نیستند"
-
+    user_exists = "نام کاربری"
+    email_exists = "ایمیل"
+    password_mismatch = "یکسان"
     # all correct
     user_1 = User()
     if not user_1.signup(driver, msg, send_type=False):
         return failed('4', msg)
+    if not ut.connect(ip, driver, msg):
+        return failed('4', msg)
     source_1 = driver.page_source
-    if user_exists in source_1 or password_mismatch in source_1 or email_exists in source_1:
+    if user_exists in source_1:
         return failed('4', error_msg)
     driver.delete_all_cookies()
 
     # username error
     user_2 = User()
     user_2.username = user_1.username
-    user_2.signup(driver, msg)
+    user_2.signup(driver, msg, send_type=False)
     source_2 = driver.page_source
-    if user_exists not in source_2 or password_mismatch in source_2 or email_exists in source_2:
+    if user_exists not in source_2:
         msg.append("wrong error messages shown in signup errors")
         return failed('4', msg)
     driver.delete_all_cookies()
@@ -138,7 +138,7 @@ def test_4(ip, group_id, driver):
     user_3.email = user_1.email
     user_3.signup(driver, msg, send_type=False)
     source_3 = driver.page_source
-    if user_exists in source_3 or password_mismatch in source_3 or email_exists not in source_3:
+    if email_exists not in source_3:
         msg.append("wrong error messages shown in signup errors")
         return failed('4', msg)
     driver.delete_all_cookies()
@@ -146,11 +146,14 @@ def test_4(ip, group_id, driver):
     # password mismatch error
     user_4 = User()
     user_4.signup(driver, msg, send_mismatched_password=True, send_type=False)
+    
     source_4 = driver.page_source
-    if user_exists in source_4 or password_mismatch not in source_4 or email_exists in source_4:
+    if password_mismatch not in source_4:
+        msg.append("password mismatch")
         return failed('4', msg)
     ut.login_to_django_admin(group_id=group_id, driver=driver, ip=ip, msg=msg)
     if not ut.check_user_in_django_admin(ip, user_1, driver, msg):
+        msg.append("ADD THAT FUCKING ADMIN, PASSOMASS TO YOUR DJANGO ADMINS")
         return failed('4', msg)
     if ut.check_user_in_django_admin(ip, user_2, driver, msg):
         return failed('4', msg)
@@ -185,9 +188,6 @@ def submit_contact_us(ip, group_id, driver, msg):
     if email_field.get_attribute("type") != "email":
         msg.append("email field type is not email")
         return None
-    if text_field.get_attribute("minlength") != "10" or text_field.get_attribute("maxlength") != "250":
-        msg.append("text field min length is not 10 or max length is not 250")
-        return None
     message = ContactMessage()
     title_field.send_keys(message.title)
     email_field.send_keys(message.email)
@@ -215,33 +215,34 @@ def test_6(ip, group_id, driver):
     message = submit_contact_us(ip, group_id, driver, msg)
     if message is None:
         return failed('6', msg)
-    if not ut.connect("https://www.fastmail.com/login/", driver, msg):
-        return failed('6', msg)
-    WebDriverWait(driver, 20).until(
-        EC.text_to_be_present_in_element((By.XPATH, "//*"), "Log In"))
-    username_field = ut.find_element_name(driver, "username", msg)
-    password_field = ut.find_element_name(driver, "password", msg)
-    login_button = ut.find_css_selector_element(driver, "button", msg)
-    if username_field is None or password_field is None or login_button is None:
-        return failed('6', msg)
-    username_field.send_keys("ostadju@fastmail.com")
-    password_field.send_keys("thegreatramz")
-    login_button.click()
-    WebDriverWait(driver, 10).until(
-        EC.text_to_be_present_in_element((By.XPATH, "//*"), "No Conversation Selected"))
-    title_link = ut.find_css_selector_element(driver, "div[title={}]".format(message.title), msg)
-    if title_link is None:
-        return failed('6', msg)
-    title_link.click()
-    WebDriverWait(driver, 10).until(
-        EC.text_to_be_present_in_element((By.XPATH, "//*"), "Reply"))
-    source = driver.page_source
-    if message.text not in source or message.email not in source:
-        # print(source)
-        # print(message.text)
-        # print(message.email)
-        return failed('6', "contact us message hasn't sent correctly")
-    return passed('6')
+    for i in range(10):
+        if not ut.connect("https://www.fastmail.com/login/", driver, msg):
+            return failed('6', msg)
+        WebDriverWait(driver, 20).until(
+            EC.text_to_be_present_in_element((By.XPATH, "//*"), "Log In"))
+        username_field = ut.find_element_name(driver, "username", msg)
+        password_field = ut.find_element_name(driver, "password", msg)
+        login_button = ut.find_css_selector_element(driver, "button", msg)
+        if username_field is None or password_field is None or login_button is None:
+            return failed('6', msg)
+        username_field.send_keys("ostadju@fastmail.com")
+        password_field.send_keys("thegreatramz")
+        login_button.click()
+        WebDriverWait(driver, 10).until(
+            EC.text_to_be_present_in_element((By.XPATH, "//*"), "No Conversation Selected"))
+        title_link = ut.find_css_selector_element(driver, "div[title={}]".format(message.title), msg)
+        if title_link is None:
+            return failed('6', msg)
+        title_link.click()
+        WebDriverWait(driver, 10).until(
+            EC.text_to_be_present_in_element((By.XPATH, "//*"), "Reply"))
+        source = driver.page_source
+        if message.text not in source or message.email not in source:
+            # print(source)
+            # print(message.text)
+            # print(message.email)
+            return failed('6', "contact us message hasn't sent correctly")
+        return passed('6')
 
 
 def test_7(ip, group_id, driver):
@@ -1332,6 +1333,6 @@ def test_26(ip, group_id, driver):
     submit.accept()
     if not ut.login_to_django_admin(group_id, driver, ip, msg):
         return failed('26', msg)
-    if ut.check_user_in_django_admin(ip, user_1, driver, msg):
+    if ut.check_user_in_django_admin(ip,user_1, driver, msg):
         return failed('26', "user has not been removed")
     return passed('26')
