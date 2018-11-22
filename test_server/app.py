@@ -70,7 +70,8 @@ def handle_request():
         if 'test_order' in request_data:
             test_order = literal_eval(request_data['test_order'])
             logger.log_info(
-                'custom test order {} was given for team "{}" with group_id {}'.format(test_order, team_names[int(group_id)],
+                'custom test order {} was given for team "{}" with group_id {}'.format(test_order,
+                                                                                       team_names[int(group_id)],
                                                                                        group_id))
 
             if type(test_order) == int:
@@ -163,8 +164,8 @@ def worker_function(ip, group_id, test_order):
 
 
 def report_test_results(group_id, test_results):
-    print('http://{}:{}/{}'.format(config.REPORT_SERVER_HOST, config.REPORT_SERVER_PORT, config.REPORT_SERVER_PATH))
-    print(test_results)
+    logger.log_log('log report for team "{}" with group_id {}'.format(team_names[int(group_id)], group_id))
+    logger.log_log(test_results)
     test_results['group_id'] = group_id
     requests.post(
         'http://{}:{}/{}'.format(config.REPORT_SERVER_HOST, config.REPORT_SERVER_PORT, config.REPORT_SERVER_PATH),

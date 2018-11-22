@@ -11,7 +11,12 @@ from datetime import datetime
 
 
 def _log_base(title, title_color, *args):
-    print(HEADER + str(datetime.now()) + ENDC + '\t' + title_color + BOLD + UNDERLINE + title + ENDC + '\t|\t', *args,flush=True)
+    print(HEADER + str(datetime.now()) + ENDC + '\t' + title_color + BOLD + UNDERLINE + title + ENDC + '\t|\t', *args,
+          flush=True)
+
+
+def log_log(*args):
+    _log_base('LOG', WARNING, *args)
 
 
 def log_warn(*args):
