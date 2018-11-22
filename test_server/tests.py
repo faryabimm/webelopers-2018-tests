@@ -35,13 +35,14 @@ def test_1(ip, group_id, driver):
     if not ut.check_navbar(False, driver, msg):
         return failed('1', msg)
 
-    if "به سامانه استادجو خوش آمدید" not in driver.page_source:
+    if "به سامانه استادجو خوش" not in driver.page_source:
         return failed('1', 'incorrect or not found welcome message')
 
     home_url = driver.current_url
     home_source = driver.page_source
     ut.find_element_id(driver, "id_navbar_home", msg).click()
     if driver.current_url != home_url or driver.page_source != home_source:
+        msg.append("url or page source after pressing home button on navbar in the same as it was before")
         return failed('1', msg)
 
     return passed('1')
@@ -56,7 +57,7 @@ def test_2(ip, group_id, driver):
         return failed('2', msg)
     home_url = driver.current_url
     home_source = driver.page_source
-    if not user.signup(driver, msg):
+    if not user.signup(driver, msg, send_type=False):
         return failed('2', msg)
     if driver.current_url != home_url or driver.page_source != home_source:
         return failed('2', 'redirect to home after signup failed')
