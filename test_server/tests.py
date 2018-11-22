@@ -1191,16 +1191,6 @@ def test_23(ip, group_id, driver):
 
         # todo REMOVE THESE LINES
         #########################
-        if not user.login(driver, msg):
-            return failed('23', msg)
-        if not user.go_to_profile(driver, msg):
-            return failed('23', msg)
-        if user.is_student:
-            if 'دانشجو' not in driver.page_source:
-                return failed('23', msg)
-        else:
-            if 'استاد' not in driver.page_source:
-                return failed('23', msg)
         #########################
 
         if not user.logout(driver, msg):
