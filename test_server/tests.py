@@ -278,7 +278,7 @@ def create_user_goto_profile(ip, group_id, driver, msg):
         msg.append("profile link visible on navbar before login")
         return None
     user_1 = User()
-    if not user_1.signup(driver, msg):
+    if not user_1.signup(driver, msg, send_type=False):
         return None
     if not user_1.login(driver, msg):
         return None

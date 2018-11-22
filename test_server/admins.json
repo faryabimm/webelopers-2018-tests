@@ -12,6 +12,11 @@
   "2" : {
     "username" : "admin",
     "password" : "ramzekhafan"
+  },
+
+  "3" : {
+    "username" : "admin",
+    "password" : "passomass"
   }
 
 }
