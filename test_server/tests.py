@@ -145,7 +145,7 @@ def test_4(ip, group_id, driver):
 
     # password mismatch error
     user_4 = User()
-    user_4.signup(driver, msg, send_mismatched_password=True)
+    user_4.signup(driver, msg, send_mismatched_password=True, send_type=False)
     source_4 = driver.page_source
     if user_exists in source_4 or password_mismatch not in source_4 or email_exists in source_4:
         return failed('4', msg)
@@ -253,7 +253,7 @@ def test_7(ip, group_id, driver):
     if ut.find_element_id(driver, "id_navbar", msg) is None:
         return failed('7', msg)
     user_1 = User()
-    if not user_1.signup(driver, msg):
+    if not user_1.signup(driver, msg, send_type=False):
         return failed('7', msg)
     if not user_1.login(driver, msg):
         return failed('7', msg)

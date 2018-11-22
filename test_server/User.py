@@ -42,6 +42,11 @@ class User:
                 id_type_student.click()
             else:
                 id_type_teacher.click()
+        else:
+            if id_type_teacher is None:
+                msg.pop()
+            if id_type_student is None:
+                msg.pop()
         signup_submit = ut.find_element_id(driver, "id_submit", msg)
         if signup_submit is None:
             return False

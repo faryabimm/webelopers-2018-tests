@@ -8,8 +8,8 @@ options = webdriver.ChromeOptions()
 #options.add_argument('headless')
 driver = webdriver.Chrome(chrome_options=options)
 # driver = webdriver.Firefox()
-ip = "http://localhost:8000"
-for i in range(1, 27):
+ip = "http://192.168.197.154:8000"
+for i in [7]:
     # if i not in [21]:
     #     continue
     test = getattr(tests, ('test_' + str(i)))
