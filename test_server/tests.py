@@ -109,9 +109,9 @@ def test_4(ip, group_id, driver):
         return failed('4', msg)
     if not ut.check_navbar(False, driver, msg):
         return failed('4', msg)
-    user_exists = "نام کاربری"
-    email_exists = "ایمیل"
-    password_mismatch = "یکسان"
+    user_exists = "کاربری با نام کاربری وارد شده وجود دارد"
+    email_exists = "کاربری با ایمیل وارد شده وجود دارد"
+    password_mismatch = "گذرواژه و تکرار گذرواژه یکسان نیستند"
     # all correct
     user_1 = User()
     if not user_1.signup(driver, msg, send_type=False):
@@ -128,7 +128,7 @@ def test_4(ip, group_id, driver):
     user_2.username = user_1.username
     user_2.signup(driver, msg, send_type=False)
     source_2 = driver.page_source
-    if user_exists not in source_2:
+    if user_exists not in source_2 or email_exists in source_2 or password_mismatch in source_2:
         msg.append("wrong error messages shown in signup errors")
         return failed('4', msg)
     driver.delete_all_cookies()
@@ -138,7 +138,7 @@ def test_4(ip, group_id, driver):
     user_3.email = user_1.email
     user_3.signup(driver, msg, send_type=False)
     source_3 = driver.page_source
-    if email_exists not in source_3:
+    if email_exists not in source_3 or user_exists in source_3 or password_mismatch in source_3:
         msg.append("wrong error messages shown in signup errors")
         return failed('4', msg)
     driver.delete_all_cookies()
@@ -148,7 +148,7 @@ def test_4(ip, group_id, driver):
     user_4.signup(driver, msg, send_mismatched_password=True, send_type=False)
     
     source_4 = driver.page_source
-    if password_mismatch not in source_4:
+    if password_mismatch not in source_4 or user_exists in source_4 or email_exists in source_4:
         msg.append("password mismatch")
         return failed('4', msg)
     ut.login_to_django_admin(group_id=group_id, driver=driver, ip=ip, msg=msg)
