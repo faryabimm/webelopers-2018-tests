@@ -54,10 +54,9 @@ def test_2(ip, group_id, driver):
     home_source = driver.page_source
     if not user.signup(driver, msg, send_type=False):
         return failed('2', msg)
-    if driver.current_url != home_url or driver.page_source != home_source:
-        return failed('2', 'redirect to home after signup failed')
     ut.login_to_django_admin(group_id=group_id, driver=driver, ip=ip, msg=msg)
     if not ut.check_user_in_django_admin(ip, user, driver, msg):
+        msg.append("line 59 call a staff")
         return failed('2', msg)
 
     return passed('2')
@@ -110,9 +109,9 @@ def test_4(ip, group_id, driver):
         return failed('4', msg)
     if not ut.check_navbar(False, driver, msg):
         return failed('4', msg)
-    user_exists = "کاربری با نام کاربری وارد شده وجود دارد"
-    email_exists = "کاربری با ایمیل وارد شده وجود دارد"
-    password_mismatch = "گذرواژه و تکرار گذرواژه یکسان نیستند"
+    user_exists = "نام کاربری"
+    email_exists = "ایمیل"
+    password_mismatch = "یکسان"
 
     # all correct
     user_1 = User()
