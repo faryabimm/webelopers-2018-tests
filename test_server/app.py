@@ -1,7 +1,10 @@
+import pickle as pk
 import sys
 from ast import literal_eval
 from datetime import datetime, timedelta
 from threading import Thread
+from urllib.error import URLError
+from urllib.request import urlopen
 
 import configuration as config
 import logger
@@ -19,6 +22,9 @@ driver_options = Options()
 driver_options.headless = True
 
 group_status = {}
+
+with open('team_id_name_data.PyData', mode='rb') as read_file:
+    team_names = pk.load(read_file)
 
 
 def test_and_set_active(group_id):
@@ -58,27 +64,47 @@ def handle_request():
     group_id = request_data['group_id']
 
     if test_and_set_active(group_id):
-        logger.log_info('lock acquired for group_id', group_id)
+        logger.log_info('lock acquired for team "{}" with group_id {}'.format(team_names[int(group_id)], group_id))
         ip = 'http://{}:{}'.format(request_data['ip'], request_data['port'])
         test_order = None
         if 'test_order' in request_data:
-            logger.log_info('custom test order was given for group_id', group_id)
             test_order = literal_eval(request_data['test_order'])
+            logger.log_info(
+                'custom test order {} was given for team "{}" with group_id {}'.format(test_order,
+                                                                                       team_names[int(group_id)],
+                                                                                       group_id))
+
             if type(test_order) == int:
                 test_order = [test_order]
 
         process_request(ip, group_id, test_order)
-        logger.log_success('test for group_id', group_id, 'initiated successfully')
+        logger.log_success(
+            'test for team "{}" with group_id {} initiated successfully'.format(team_names[int(group_id)], group_id))
         return "success - test initiated"
     else:
-        logger.log_error('another test for group_id', group_id, 'is in progress')
+        logger.log_error(
+            'another test for team "{}" with group_id {} is in progress'.format(team_names[int(group_id)], group_id))
         return "error - existing test in progress", 406
+
+
+def check_url_availability(url):
+    try:
+        return_code = _check_url_availability(url)
+    except (TimeoutError, URLError):
+        return_code = 500
+
+    return return_code == 200
+
+
+@timeout(seconds=config.ACCESS_TIMEOUT_S, use_signals=False)
+def _check_url_availability(url):
+    return urlopen(url).getcode()
 
 
 def worker_run_tests(ip, test_order, group_id):
     test_results = {}
 
-    if requests.get(ip).status_code != 200:
+    if not check_url_availability(ip):
         test_results['verdict'] = 'not_reachable'
         test_results['test_order'] = test_order[0]  # TOF :(
         test_results['log'] = 'not reachable'
@@ -86,7 +112,6 @@ def worker_run_tests(ip, test_order, group_id):
         return test_results
 
     if test_order is not None:
-        # print(test_order)
         for test_id in test_order:
             test_name = 'test_{}'.format(test_id)
             test_function = getattr(tests, test_name)
@@ -125,18 +150,22 @@ def worker_run_tests(ip, test_order, group_id):
 
 
 def worker_function(ip, group_id, test_order):
-    logger.log_info('running tests for group_id', group_id, 'on ip address', ip)
+    logger.log_info(
+        'running tests for team "{}" with group_id {} on ip address {}'.format(team_names[int(group_id)], group_id, ip))
     test_results = worker_run_tests(ip, test_order, group_id)
-    logger.log_info('releasing lock for group_id', group_id)
+    logger.log_info('releasing lock for team "{}" with group_id {}'.format(team_names[int(group_id)], group_id))
     deactivate_status(group_id)
-    logger.log_info('reporting test results for group_id', group_id, 'on ip address', ip, 'to competition server')
+    logger.log_info(
+        'reporting test results for team "{}" with group_id {} on ip address {} to competition server'.format(
+            team_names[int(group_id)], group_id, ip))
     report_test_results(group_id, test_results)
-    logger.log_success('test for group_id', group_id, 'finished successfully')
+    logger.log_success(
+        'test for team "{}" with group_id {} finished successfully'.format(team_names[int(group_id)], group_id))
 
 
 def report_test_results(group_id, test_results):
-    print('http://{}:{}/{}'.format(config.REPORT_SERVER_HOST, config.REPORT_SERVER_PORT, config.REPORT_SERVER_PATH))
-    print(test_results)
+    logger.log_log('log report for team "{}" with group_id {}'.format(team_names[int(group_id)], group_id))
+    logger.log_log(test_results)
     test_results['group_id'] = group_id
     requests.post(
         'http://{}:{}/{}'.format(config.REPORT_SERVER_HOST, config.REPORT_SERVER_PORT, config.REPORT_SERVER_PATH),
@@ -150,18 +179,19 @@ def process_request(ip, group_id, test_order):
 
 @timeout(config.TEST_TIMEOUT_S, use_signals=False)
 def run_test(test_function, ip, group_id):
-    print(1)
     driver = group_status[group_id]['driver']
-    print(2)
-    # utils.clear_cache(driver)
+
     driver.get(ip)
     driver.delete_all_cookies()
-    print(3)
-    result, string_output = test_function(
-        ip, group_id, driver
-    )
-    print(4)
-    print(result, string_output, 'HMM')
+    try:
+        result, string_output = test_function(
+            ip, group_id, driver
+        )
+    except Exception as exception:
+        logger.log_warn(
+            'test for for team "{}" with group_id {} ended with exception'.format(team_names[int(group_id)], group_id))
+        return False, str(exception), 'HMM'
+
     return result, string_output, 'HMM'
 
 
@@ -170,9 +200,6 @@ def runserver(port=config.PORT):
 
 
 if __name__ == '__main__':
-    # print(run_test(tests.test_7, None))
-    # display = Display(visible=0, size=(800, 600))
-    # display.start()
 
     try:
         utils.load_admins("admins.json")

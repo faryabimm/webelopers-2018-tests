@@ -68,6 +68,7 @@ class Event:
         while True:
             id_event = ut.find_element_id(driver, 'id_meeting_' + str(i), msg)
             if id_event is None:
+                msg.pop()
                 break
             source = id_event.text
             # print(source)

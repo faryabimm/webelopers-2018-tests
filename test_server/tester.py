@@ -7,7 +7,15 @@ print(datetime.datetime.now().time())
 options = webdriver.ChromeOptions()
 #options.add_argument('headless')
 driver = webdriver.Chrome(chrome_options=options)
-print(tests.test_21("http://localhost:8000", "2", driver))
+# driver = webdriver.Firefox()
+ip = "http://localhost:8000"
+for i in range(1, 27):
+    # if i not in [21]:
+    #     continue
+    test = getattr(tests, ('test_' + str(i)))
+    print(test(ip, "2", driver))
+    driver.get(ip)
+    driver.delete_all_cookies()
 # driver.close()
 print(datetime.datetime.now().time())
 
