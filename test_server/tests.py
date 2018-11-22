@@ -77,7 +77,7 @@ def test_3(ip, group_id, driver):
     if not ut.check_navbar(False, driver, msg):
         return failed('3', msg)
     user_1 = User()
-    if not user_1.signup(driver, msg):
+    if not user_1.signup(driver, msg, send_type=False):
         return failed('3', msg)
     driver.delete_all_cookies()
     if not ut.connect(ip, driver, msg):
@@ -122,7 +122,7 @@ def test_4(ip, group_id, driver):
 
     # all correct
     user_1 = User()
-    if not user_1.signup(driver, msg):
+    if not user_1.signup(driver, msg, send_type=False):
         return failed('4', msg)
     source_1 = driver.page_source
     if user_exists in source_1 or password_mismatch in source_1 or email_exists in source_1:
@@ -142,7 +142,7 @@ def test_4(ip, group_id, driver):
     # email error
     user_3 = User()
     user_3.email = user_1.email
-    user_3.signup(driver, msg)
+    user_3.signup(driver, msg, send_type=False)
     source_3 = driver.page_source
     if user_exists in source_3 or password_mismatch in source_3 or email_exists not in source_3:
         msg.append("wrong error messages shown in signup errors")
