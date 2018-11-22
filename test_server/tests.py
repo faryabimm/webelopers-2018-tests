@@ -125,7 +125,7 @@ def test_4(ip, group_id, driver):
     # username error
     user_2 = User()
     user_2.username = user_1.username
-    user_2.signup(driver, msg)
+    user_2.signup(driver, msg, send_type=False)
     source_2 = driver.page_source
     if user_exists not in source_2 or password_mismatch in source_2 or email_exists in source_2:
         msg.append("wrong error messages shown in signup errors")
@@ -214,33 +214,34 @@ def test_6(ip, group_id, driver):
     message = submit_contact_us(ip, group_id, driver, msg)
     if message is None:
         return failed('6', msg)
-    if not ut.connect("https://www.fastmail.com/login/", driver, msg):
-        return failed('6', msg)
-    WebDriverWait(driver, 20).until(
-        EC.text_to_be_present_in_element((By.XPATH, "//*"), "Log In"))
-    username_field = ut.find_element_name(driver, "username", msg)
-    password_field = ut.find_element_name(driver, "password", msg)
-    login_button = ut.find_css_selector_element(driver, "button", msg)
-    if username_field is None or password_field is None or login_button is None:
-        return failed('6', msg)
-    username_field.send_keys("ostadju@fastmail.com")
-    password_field.send_keys("thegreatramz")
-    login_button.click()
-    WebDriverWait(driver, 10).until(
-        EC.text_to_be_present_in_element((By.XPATH, "//*"), "No Conversation Selected"))
-    title_link = ut.find_css_selector_element(driver, "div[title={}]".format(message.title), msg)
-    if title_link is None:
-        return failed('6', msg)
-    title_link.click()
-    WebDriverWait(driver, 10).until(
-        EC.text_to_be_present_in_element((By.XPATH, "//*"), "Reply"))
-    source = driver.page_source
-    if message.text not in source or message.email not in source:
-        # print(source)
-        # print(message.text)
-        # print(message.email)
-        return failed('6', "contact us message hasn't sent correctly")
-    return passed('6')
+    for i in range(10):
+        if not ut.connect("https://www.fastmail.com/login/", driver, msg):
+            return failed('6', msg)
+        WebDriverWait(driver, 20).until(
+            EC.text_to_be_present_in_element((By.XPATH, "//*"), "Log In"))
+        username_field = ut.find_element_name(driver, "username", msg)
+        password_field = ut.find_element_name(driver, "password", msg)
+        login_button = ut.find_css_selector_element(driver, "button", msg)
+        if username_field is None or password_field is None or login_button is None:
+            return failed('6', msg)
+        username_field.send_keys("ostadju@fastmail.com")
+        password_field.send_keys("thegreatramz")
+        login_button.click()
+        WebDriverWait(driver, 10).until(
+            EC.text_to_be_present_in_element((By.XPATH, "//*"), "No Conversation Selected"))
+        title_link = ut.find_css_selector_element(driver, "div[title={}]".format(message.title), msg)
+        if title_link is None:
+            return failed('6', msg)
+        title_link.click()
+        WebDriverWait(driver, 10).until(
+            EC.text_to_be_present_in_element((By.XPATH, "//*"), "Reply"))
+        source = driver.page_source
+        if message.text not in source or message.email not in source:
+            # print(source)
+            # print(message.text)
+            # print(message.email)
+            return failed('6', "contact us message hasn't sent correctly")
+        return passed('6')
 
 
 def test_7(ip, group_id, driver):
