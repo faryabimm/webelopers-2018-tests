@@ -183,10 +183,14 @@ def run_test(test_function, ip, group_id):
 
     driver.get(ip)
     driver.delete_all_cookies()
-
-    result, string_output = test_function(
-        ip, group_id, driver
-    )
+    try:
+        result, string_output = test_function(
+            ip, group_id, driver
+        )
+    except Exception as exception:
+        logger.log_warn(
+            'test for for team "{}" with group_id {} ended with exception'.format(team_names[int(group_id)], group_id))
+        return False, str(exception), 'HMM'
 
     return result, string_output, 'HMM'
 
