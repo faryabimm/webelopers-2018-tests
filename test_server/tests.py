@@ -41,9 +41,8 @@ def test_1(ip, group_id, driver):
     home_url = driver.current_url
     home_source = driver.page_source
     ut.find_element_id(driver, "id_navbar_home", msg).click()
-    if driver.current_url != home_url or driver.page_source != home_source:
-        msg.append("url or page source after pressing home button on navbar in the same as it was before")
-        return failed('1', msg)
+    if ْ"به سامانه استادجو خوش"not in driver.page_source:
+        return failed('1', "incorrect or not found welcome message")
 
     return passed('1')
 
@@ -1129,14 +1128,11 @@ def test_21(ip, group_id, driver):
     id_search.send_keys(user1.username)
     id_res = ut.find_element_id(driver, 'autocomplete_results', msg)
     # print(datetime.datetime.now().time())
-<<<<<<< HEAD
     time.sleep(1)
     #submitted = WebDriverWait(driver, 5).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#autocomplete_results a")))
-=======
     # time.sleep(1)
     # EC.number_of_windows_to_be
     submitted = WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.CSS_SELECTOR, "#autocomplete_results a")))
->>>>>>> 19f1f3cf4a661d50dff0d25355be8afbfe695ebe
     if submitted is None:
         return failed('21', msg)
     # print(submitted.text)
