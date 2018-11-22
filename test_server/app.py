@@ -190,7 +190,7 @@ def run_test(test_function, ip, group_id):
     except Exception as exception:
         logger.log_warn(
             'test for for team "{}" with group_id {} ended with exception'.format(team_names[int(group_id)], group_id))
-        return False, str(exception), 'HMM'
+        return False, ('Exception: ' + str(exception)), 'HMM'
 
     return result, string_output, 'HMM'
 
