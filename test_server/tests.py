@@ -318,18 +318,16 @@ def test_9(ip, group_id, driver):
     submit_button = ut.find_element_id(driver, "id_submit", msg)
     if field_first_name is None or field_last_name is None or submit_button is None:
         return failed('9', msg)
-    first_name_salt = ut.random_string(5)
-    last_name_salt = ut.random_string(5)
-    field_first_name.send_keys(first_name_salt)
-    field_last_name.send_keys(last_name_salt)
+    first_name = ut.random_string(15)
+    last_name = ut.random_string(15)
+    field_first_name.send_keys(first_name)
+    field_last_name.send_keys(last_name)
     submit_button.click()
     field_first_name = ut.find_element_id(driver, "id_first_name", msg)
     field_last_name = ut.find_element_id(driver, "id_last_name", msg)
     if field_first_name is None or field_last_name is None:
         return failed('9', msg)
-    edited_first_name = user_1.first_name + first_name_salt
-    edited_last_name = user_1.last_name + last_name_salt
-    if edited_first_name not in field_first_name.text or edited_last_name not in field_last_name.text:
+    if first_name not in field_first_name.text or last_name not in field_last_name.text:
         msg.append("profile edit hasn't completed correctly")
         return failed('9', msg)
     return passed('9')
