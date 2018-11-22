@@ -9,7 +9,7 @@ for i in range(9,10):
     try:
         driver = webdriver.Chrome()
         test_i = getattr(tests, "test_{}".format(i))
-        print(test_i("http://192.168.194.10:8000", "1", driver))
+        print(test_i("http://192.168.197.30:8000", "1", driver))
         # driver.close()
     except:
         exc_info = sys.exc_info()
