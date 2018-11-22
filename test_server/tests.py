@@ -225,7 +225,7 @@ def test_6(ip, group_id, driver):
         username_field.send_keys("ostadju@fastmail.com")
         password_field.send_keys("thegreatramz")
         login_button.click()
-        if not ut.connect("https://www.fastmail.com/mail/Inbox"):
+        if not ut.connect("https://www.fastmail.com/mail/Inbox", driver, msg):
             msg.append("connection to fastmail failed call a staff NOW")
             return failed('6', msg)
         WebDriverWait(driver, 10).until(
