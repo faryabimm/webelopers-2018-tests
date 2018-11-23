@@ -1185,7 +1185,7 @@ def test_23(ip, group_id, driver):
         home_source = driver.page_source
         if not user.signup(driver, msg, send_type=True):
             return failed('23', msg)
-        if driver.current_url != home_url or driver.page_source != home_source:
+        if driver.current_url != home_url:
             msg.append('redirect to home after signup failed')
             return failed('23', msg)
 
