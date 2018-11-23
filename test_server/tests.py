@@ -1309,8 +1309,8 @@ def test_26(ip, group_id, driver):
         return failed('26', msg)
     if not user_1.login(driver, msg):
         return failed('26', msg)
-    login = ut.find_element_id(driver, "id_navbar_login", msg)
-    if login != None:
+    logout = ut.find_element_id(driver, "id_navbar_logout", msg)
+    if logout != None:
         msg.append("user logged in after removing it")
         return failed('26', msg)
     return passed('26')
