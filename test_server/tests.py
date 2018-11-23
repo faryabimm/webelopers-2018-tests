@@ -364,7 +364,7 @@ def test_10(ip, group_id, driver):
         return failed('10', msg)
     text_gender = ut.find_element_id(driver, "id_gender", msg)
     if text_gender is None:
-        return failed('10')
+        return failed('10', msg)
     gender = {'M': "مرد", 'F': "زن"}
     if gender[user_1.gender] not in text_gender.text:
         msg.append("user gender has not been saved correctly")
