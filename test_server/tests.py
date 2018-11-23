@@ -56,7 +56,7 @@ def test_2(ip, group_id, driver):
         return failed('2', msg)
     ut.login_to_django_admin(group_id=group_id, driver=driver, ip=ip, msg=msg)
     if not ut.check_user_in_django_admin(ip, user, driver, msg):
-        msg.append("line 59 call a staff, maybe superuser with admin and password=passomass not set or not using django\'s defualt User model")
+        msg.append("line 59 call a staff, maybe superuser with admin and password=passomass not set or not using django\'s defualt User model or you are EZed")
         return failed('2', msg)
 
     return passed('2')
@@ -276,14 +276,14 @@ def create_user_goto_profile(ip, group_id, driver, msg):
     navbar = ut.find_element_id(driver, "id_navbar", msg)
     if navbar is None:
         return None
-    profile = ut.find_element_id(driver, "id_navbar_profile", msg)
-    if profile is not None:
-        msg.append("profile link visible on navbar before login")
-        return None
     user_1 = User()
     if not user_1.signup(driver, msg, send_type=False):
         return None
     if not user_1.login(driver, msg):
+        return None
+    profile = ut.find_element_id(driver, "id_navbar_profile", msg)
+    if profile is None:
+        msg.append("profile link not found on navbar after login")
         return None
     profile = ut.find_element_id(driver, "id_navbar_profile", msg)
     if profile is None:
@@ -318,18 +318,18 @@ def test_9(ip, group_id, driver):
     submit_button = ut.find_element_id(driver, "id_submit", msg)
     if field_first_name is None or field_last_name is None or submit_button is None:
         return failed('9', msg)
-    first_name_salt = ut.random_string(5)
-    last_name_salt = ut.random_string(5)
-    field_first_name.send_keys(first_name_salt)
-    field_last_name.send_keys(last_name_salt)
+    first_name = ut.random_string(15)
+    last_name = ut.random_string(15)
+    field_first_name.clear()
+    field_last_name.clear()
+    field_first_name.send_keys(first_name)
+    field_last_name.send_keys(last_name)
     submit_button.click()
     field_first_name = ut.find_element_id(driver, "id_first_name", msg)
     field_last_name = ut.find_element_id(driver, "id_last_name", msg)
     if field_first_name is None or field_last_name is None:
         return failed('9', msg)
-    edited_first_name = user_1.first_name + first_name_salt
-    edited_last_name = user_1.last_name + last_name_salt
-    if edited_first_name not in field_first_name.text or edited_last_name not in field_last_name.text:
+    if first_name not in field_first_name.text or last_name not in field_last_name.text:
         msg.append("profile edit hasn't completed correctly")
         return failed('9', msg)
     return passed('9')
@@ -573,7 +573,7 @@ def test_14(ip, group_id, driver):
     error_invalid_date = 'تاریخ وارد شده معتبر نمی‌باشد'
 
     date1 = time.strftime('%Y-%m-%d', ut.random_date_time())
-    date2 = time.strftime('%Y-%m-%d', ut.random_date_time())
+    date1 = time.strftime('%Y-%m-%d', ut.random_date_time())
     time1 = ut.random_date_time()
     time2 = ut.random_time_gt(time1)
     time3 = ut.random_time_gt(time2)
@@ -799,7 +799,7 @@ def test_16(ip, group_id, driver):
     event.new()
     if not event.save(driver, msg, logout_login=False):
         return failed('16', msg)
-
+ 
     # todo maybe removed
     ####################
     ut.login_to_django_admin(group_id=group_id, driver=driver, ip=ip, msg=msg)
@@ -997,10 +997,10 @@ def test_18(ip, group_id, driver):
 
         # todo maybe replaces with
         ##################
-        else:
-            ut.login_to_django_admin(group_id=group_id, driver=driver, ip=ip, msg=msg)
-            if not ut.check_reserve_in_django_admin(ip, event, user_student, driver, msg):
-                return failed('18', msg)
+        # else:
+        #     ut.login_to_django_admin(group_id=group_id, driver=driver, ip=ip, msg=msg)
+        #     if not ut.check_reserve_in_django_admin(ip, event, user_student, driver, msg):
+        #         return failed('18', msg)
         ##################
         # else:
         #     if valid not in driver.page_source:
@@ -1185,26 +1185,13 @@ def test_23(ip, group_id, driver):
         home_source = driver.page_source
         if not user.signup(driver, msg, send_type=True):
             return failed('23', msg)
-        if driver.current_url != home_url or driver.page_source != home_source:
+        if driver.current_url != home_url:
             msg.append('redirect to home after signup failed')
             return failed('23', msg)
 
         # todo REMOVE THESE LINES
         #########################
-        if not user.login(driver, msg):
-            return failed('23', msg)
-        if not user.go_to_profile(driver, msg):
-            return failed('23', msg)
-        if user.is_student:
-            if 'دانشجو' not in driver.page_source:
-                return failed('23', msg)
-        else:
-            if 'استاد' not in driver.page_source:
-                return failed('23', msg)
         #########################
-
-        if not user.logout(driver, msg):
-            return failed('23', msg)
 
     return passed('23')
 
@@ -1281,7 +1268,7 @@ def test_25(ip, group_id, driver):
     search_button.click()
     username_link = None
     for a in driver.find_elements_by_xpath("//a"):
-        if a.text == user.username:
+        if user.username in a.text:
             username_link = a
             break
     if username_link is None:
@@ -1323,16 +1310,15 @@ def test_26(ip, group_id, driver):
     if username_field is None:
         return failed('26', msg)
     username_field.send_keys(user_1.username)
-    #    submit = ut.find_element_id(driver, "id_remove_user", msg)
-    #    if submit is None:
-    #        return failed('26', msg)
-    #    submit.click()
-    submit = driver.switchTo().alert()
-    if submit is None:
-        return failed('26', "no remove user confirmation dialog displayed")
-    submit.accept()
+    try:
+        WebDriverWait(browser, 3).until(EC.alert_is_present(), 'Timed out waiting for PA creation ' + 'confirmation popup to appear.')
+        alert = browser.switch_to.alert
+        alert.accept()
+    except:
+        return failed('26', "no alert shown or alert can't be closed")
     if not ut.login_to_django_admin(group_id, driver, ip, msg):
         return failed('26', msg)
     if ut.check_user_in_django_admin(ip,user_1, driver, msg):
         return failed('26', "user has not been removed")
     return passed('26')
+

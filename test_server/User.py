@@ -10,6 +10,7 @@ class User:
         self.email = ut.random_email()
         self.password = ut.random_string(10)
         self.is_student = random.choice(valid_is_students)
+        print(self.__dict__)
 
     def signup(self, driver, msg, send_mismatched_password=False, send_type=True):
         ut.find_element_id(driver, "id_navbar_signup", msg).click()
@@ -38,15 +39,16 @@ class User:
             if id_type_teacher is None or id_type_student is None:
                 msg.append("user type not found")
                 return False
-            if self.is_student:
-                id_type_student.click()
-            else:
-                id_type_teacher.click()
         else:
             if id_type_teacher is None:
                 msg.pop()
             if id_type_student is None:
                 msg.pop()
+        if id_type_teacher is not None and id_type_student is not None:
+            if self.is_student:
+                id_type_student.click()
+            else:
+                id_type_teacher.click()
         signup_submit = ut.find_element_id(driver, "id_submit", msg)
         if signup_submit is None:
             return False
