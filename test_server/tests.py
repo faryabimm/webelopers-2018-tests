@@ -1288,14 +1288,7 @@ def test_26(ip, group_id, driver):
         return failed('26', msg)
     user_1 = User()
     if not user_1.signup(driver, msg):
-        return failed('26', msg)
-    if not ut.login_to_django_admin(group_id, driver, ip, msg):
-        return failed('26', msg)
-    if not ut.check_user_in_django_admin(ip, user_1, driver, msg):
-        return failed('26', msg)
-    driver.get(ip)
-    driver.delete_all_cookies()
-    driver.get(ip)
+        return failed('26', msg) 
     if not user_1.login(driver, msg):
         return failed('26', msg)
     navbar_profile = ut.find_element_id(driver, "id_navbar_profile", msg)
@@ -1311,10 +1304,11 @@ def test_26(ip, group_id, driver):
         alert = driver.switch_to_alert()
         alert.accept()
     except:
-        return failed('26', "no alert shown or alert can't be closed")
-    if not ut.login_to_django_admin(group_id, driver, ip, msg):
+        msg.append("test 26 call a staff")
+    if not ut.connect(ip, driver, msg):
         return failed('26', msg)
-    if ut.check_user_in_django_admin(ip,user_1, driver, msg):
-        return failed('26', "user has not been removed")
+    if user_1.login(driver, msg):
+        msg.append("user can login after removing it")
+        return failed('26', msg)
     return passed('26')
 

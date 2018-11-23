@@ -204,7 +204,7 @@ def check_event_in_django_admin(ip, event, driver, msg):
 
     event_link = None
     for a in driver.find_elements_by_xpath("//a"):
-        if a.text == "Meetings":
+        if a.text == "Teacher Free Times":
             event_link = a
             break
     if event_link is None:
