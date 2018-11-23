@@ -1213,7 +1213,8 @@ def test_24(ip, group_id, driver):
 
     driver.get(ip + '/search_teachers_api/?query=' + query)
 
-    res = json.loads(ut.find_css_selector_element(driver, 'pre', msg).text.strip())
+    # res = json.loads(ut.find_css_selector_element(driver, 'pre', msg).text.strip())
+    res = json.loads(driver.page_source.strip())
     found = {}
 
     driver.get(ip)
