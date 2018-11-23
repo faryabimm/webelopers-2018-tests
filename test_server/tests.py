@@ -1306,10 +1306,6 @@ def test_26(ip, group_id, driver):
     if remove_user is None:
         return failed('26', msg)
     remove_user.click()
-    username_field = ut.find_element_id(driver, "id_username", msg)
-    if username_field is None:
-        return failed('26', msg)
-    username_field.send_keys(user_1.username)
     try:
         WebDriverWait(driver, 3).until(EC.alert_is_present(), 'Timed out waiting for PA creation ' + 'confirmation popup to appear.')
         alert = driver.switch_to_alert()
