@@ -1193,6 +1193,9 @@ def test_23(ip, group_id, driver):
         #########################
         #########################
 
+        if not user.logout(driver, msg):
+            return failed('23', msg)
+
     return passed('23')
 
 
@@ -1306,18 +1309,16 @@ def test_26(ip, group_id, driver):
     if remove_user is None:
         return failed('26', msg)
     remove_user.click()
-    # username_field = ut.find_element_id(driver, "id_username", msg)
-    # if username_field is None:
-    #     return failed('26', msg)
-    # username_field.send_keys(user_1.username)
-    #    submit = ut.find_element_id(driver, "id_remove_user", msg)
-    #    if submit is None:
-    #        return failed('26', msg)
-    #    submit.click()
-    submit = driver.switchTo().alert()
-    if submit is None:
-        return failed('26', "no remove user confirmation dialog displayed")
-    submit.accept()
+    username_field = ut.find_element_id(driver, "id_username", msg)
+    if username_field is None:
+        return failed('26', msg)
+    username_field.send_keys(user_1.username)
+    try:
+        WebDriverWait(browser, 3).until(EC.alert_is_present(), 'Timed out waiting for PA creation ' + 'confirmation popup to appear.')
+        alert = browser.switch_to.alert
+        alert.accept()
+    except:
+        return failed('26', "no alert shown or alert can't be closed")
     if not ut.login_to_django_admin(group_id, driver, ip, msg):
         return failed('26', msg)
     if ut.check_user_in_django_admin(ip,user_1, driver, msg):
