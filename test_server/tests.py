@@ -1308,7 +1308,10 @@ def test_26(ip, group_id, driver):
     if not ut.connect(ip, driver, msg):
         return failed('26', msg)
     if user_1.login(driver, msg):
-        msg.append("user can login after removing it")
+        return failed('26', msg)
+    login = ut.find_element_id(driver, "id_navbar_login")
+    if login != None:
+        msg.append("user logged in after removing it")
         return failed('26', msg)
     return passed('26')
 
