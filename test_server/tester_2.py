@@ -10,8 +10,9 @@ for i in range(26,27):
         # driver = webdriver.Chrome()
         driver = webdriver.Firefox()
         test_i = getattr(tests, "test_{}".format(i))
-        print(test_i("http://192.168.204.118:8000", "1", driver))
+        print(test_i("http://192.168.200.54:8000", "1", driver))
         # driver.close()
+
     except:
         exc_info = sys.exc_info()
         traceback.print_exception(*exc_info)
