@@ -81,7 +81,7 @@ def test_3(ip, group_id, driver):
     # checking right user
     if not ut.check_navbar(True, driver, msg):
         return failed('3', msg)
-    login_error_message = "نام کاربری"
+    login_error_message = "نام کاربری یا گذرواژه"
     if login_error_message in driver.page_source:
         return failed('3', 'no login message error shown')
     if not ut.connect(ip, driver, msg):
@@ -553,6 +553,9 @@ def test_14(ip, group_id, driver):
     if not event.create(driver, msg):
         return failed('14', msg)
 
+    driver.get(ip)
+    driver.delete_all_cookies()
+
     # todo
     ##################
     #ut.login_to_django_admin(group_id=group_id, driver=driver, ip=ip, msg=msg)
@@ -573,7 +576,7 @@ def test_14(ip, group_id, driver):
     error_invalid_date = 'تاریخ وارد شده معتبر نمی‌باشد'
 
     date1 = time.strftime('%Y-%m-%d', ut.random_date_time())
-    date1 = time.strftime('%Y-%m-%d', ut.random_date_time())
+    date2 = time.strftime('%Y-%m-%d', ut.random_date_time())
     time1 = ut.random_date_time()
     time2 = ut.random_time_gt(time1)
     time3 = ut.random_time_gt(time2)
