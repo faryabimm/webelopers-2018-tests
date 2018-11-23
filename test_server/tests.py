@@ -56,7 +56,7 @@ def test_2(ip, group_id, driver):
         return failed('2', msg)
     ut.login_to_django_admin(group_id=group_id, driver=driver, ip=ip, msg=msg)
     if not ut.check_user_in_django_admin(ip, user, driver, msg):
-        msg.append("line 59 call a staff, maybe superuser with admin and password=passomass not set or not using django\'s defualt User model")
+        msg.append("line 59 call a staff, maybe superuser with admin and password=passomass not set or not using django\'s defualt User model or you are EZed")
         return failed('2', msg)
 
     return passed('2')
@@ -109,9 +109,9 @@ def test_4(ip, group_id, driver):
         return failed('4', msg)
     if not ut.check_navbar(False, driver, msg):
         return failed('4', msg)
-    user_exists = "نام کاربری"
-    email_exists = "ایمیل"
-    password_mismatch = "یکسان"
+    user_exists = "کاربری با نام کاربری وارد شده وجود دارد"
+    email_exists = "کاربری با ایمیل وارد شده وجود دارد"
+    password_mismatch = "گذرواژه و تکرار گذرواژه یکسان نیستند"
     # all correct
     user_1 = User()
     if not user_1.signup(driver, msg, send_type=False):
@@ -128,7 +128,7 @@ def test_4(ip, group_id, driver):
     user_2.username = user_1.username
     user_2.signup(driver, msg, send_type=False)
     source_2 = driver.page_source
-    if user_exists not in source_2:
+    if user_exists not in source_2 or email_exists in source_2 or password_mismatch in source_2:
         msg.append("wrong error messages shown in signup errors")
         return failed('4', msg)
     driver.delete_all_cookies()
@@ -138,7 +138,7 @@ def test_4(ip, group_id, driver):
     user_3.email = user_1.email
     user_3.signup(driver, msg, send_type=False)
     source_3 = driver.page_source
-    if email_exists not in source_3:
+    if email_exists not in source_3 or user_exists in source_3 or password_mismatch in source_3:
         msg.append("wrong error messages shown in signup errors")
         return failed('4', msg)
     driver.delete_all_cookies()
@@ -148,12 +148,12 @@ def test_4(ip, group_id, driver):
     user_4.signup(driver, msg, send_mismatched_password=True, send_type=False)
     
     source_4 = driver.page_source
-    if password_mismatch not in source_4:
+    if password_mismatch not in source_4 or user_exists in source_4 or email_exists in source_4:
         msg.append("password mismatch")
         return failed('4', msg)
     ut.login_to_django_admin(group_id=group_id, driver=driver, ip=ip, msg=msg)
     if not ut.check_user_in_django_admin(ip, user_1, driver, msg):
-        msg.append("ADD THAT FUCKING ADMIN, PASSOMASS TO YOUR DJANGO ADMINS")
+        msg.append("ADD THAT FUCKING ADMIN, PASSOMASS TO YOUR DJANGO ADMINS AND PLEASE SET THE LANG TO en-US")
         return failed('4', msg)
     if ut.check_user_in_django_admin(ip, user_2, driver, msg):
         return failed('4', msg)
@@ -181,9 +181,6 @@ def submit_contact_us(ip, group_id, driver, msg):
     text_field = ut.find_element_id(driver, "id_text", msg)
     submit_button = ut.find_element_id(driver, "id_submit", msg)
     if title_field is None or email_field is None or text_field is None or submit_button is None:
-        return None
-    if title_field.get_attribute("maxlength") != "40":
-        msg.append("title field maxlength is not 40")
         return None
     if email_field.get_attribute("type") != "email":
         msg.append("email field type is not email")
@@ -228,6 +225,9 @@ def test_6(ip, group_id, driver):
         username_field.send_keys("ostadju@fastmail.com")
         password_field.send_keys("thegreatramz")
         login_button.click()
+        if not ut.connect("https://www.fastmail.com/mail/Inbox", driver, msg):
+            msg.append("connection to fastmail failed call a staff NOW")
+            return failed('6', msg)
         WebDriverWait(driver, 10).until(
             EC.text_to_be_present_in_element((By.XPATH, "//*"), "No Conversation Selected"))
         title_link = ut.find_css_selector_element(driver, "div[title={}]".format(message.title), msg)
@@ -276,14 +276,14 @@ def create_user_goto_profile(ip, group_id, driver, msg):
     navbar = ut.find_element_id(driver, "id_navbar", msg)
     if navbar is None:
         return None
-    profile = ut.find_element_id(driver, "id_navbar_profile", msg)
-    if profile is not None:
-        msg.append("profile link visible on navbar before login")
-        return None
     user_1 = User()
     if not user_1.signup(driver, msg, send_type=False):
         return None
     if not user_1.login(driver, msg):
+        return None
+    profile = ut.find_element_id(driver, "id_navbar_profile", msg)
+    if profile is None:
+        msg.append("profile link not found on navbar after login")
         return None
     profile = ut.find_element_id(driver, "id_navbar_profile", msg)
     if profile is None:
@@ -318,18 +318,18 @@ def test_9(ip, group_id, driver):
     submit_button = ut.find_element_id(driver, "id_submit", msg)
     if field_first_name is None or field_last_name is None or submit_button is None:
         return failed('9', msg)
-    first_name_salt = ut.random_string(5)
-    last_name_salt = ut.random_string(5)
-    field_first_name.send_keys(first_name_salt)
-    field_last_name.send_keys(last_name_salt)
+    first_name = ut.random_string(15)
+    last_name = ut.random_string(15)
+    field_first_name.clear()
+    field_last_name.clear()
+    field_first_name.send_keys(first_name)
+    field_last_name.send_keys(last_name)
     submit_button.click()
     field_first_name = ut.find_element_id(driver, "id_first_name", msg)
     field_last_name = ut.find_element_id(driver, "id_last_name", msg)
     if field_first_name is None or field_last_name is None:
         return failed('9', msg)
-    edited_first_name = user_1.first_name + first_name_salt
-    edited_last_name = user_1.last_name + last_name_salt
-    if edited_first_name not in field_first_name.text or edited_last_name not in field_last_name.text:
+    if first_name not in field_first_name.text or last_name not in field_last_name.text:
         msg.append("profile edit hasn't completed correctly")
         return failed('9', msg)
     return passed('9')
@@ -1191,16 +1191,6 @@ def test_23(ip, group_id, driver):
 
         # todo REMOVE THESE LINES
         #########################
-        if not user.login(driver, msg):
-            return failed('23', msg)
-        if not user.go_to_profile(driver, msg):
-            return failed('23', msg)
-        if user.is_student:
-            if 'دانشجو' not in driver.page_source:
-                return failed('23', msg)
-        else:
-            if 'استاد' not in driver.page_source:
-                return failed('23', msg)
         #########################
 
         if not user.logout(driver, msg):

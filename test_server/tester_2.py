@@ -4,12 +4,12 @@ import time
 import tests
 import sys
 from selenium import webdriver
-for i in range(4, 5):
+for i in range(23,24):
     print("{} TEST: {}".format(datetime.datetime.now().time(), i))
     try:
         driver = webdriver.Chrome()
         test_i = getattr(tests, "test_{}".format(i))
-        print(test_i("http://0.0.0.0:8000", "1", driver))
+        print(test_i("http://192.168.197.151:8000", "1", driver))
         # driver.close()
     except:
         exc_info = sys.exc_info()
