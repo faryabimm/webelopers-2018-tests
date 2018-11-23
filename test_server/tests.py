@@ -1307,7 +1307,7 @@ def test_26(ip, group_id, driver):
         msg.append("test 26 call a staff")
     if not ut.connect(ip, driver, msg):
         return failed('26', msg)
-    if user_1.login(driver, msg):
+    if not user_1.login(driver, msg):
         return failed('26', msg)
     login = ut.find_element_id(driver, "id_navbar_login")
     if login != None:
