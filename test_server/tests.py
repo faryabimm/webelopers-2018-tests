@@ -1311,8 +1311,8 @@ def test_26(ip, group_id, driver):
         return failed('26', msg)
     username_field.send_keys(user_1.username)
     try:
-        WebDriverWait(browser, 3).until(EC.alert_is_present(), 'Timed out waiting for PA creation ' + 'confirmation popup to appear.')
-        alert = browser.switch_to.alert
+        WebDriverWait(driver, 3).until(EC.alert_is_present(), 'Timed out waiting for PA creation ' + 'confirmation popup to appear.')
+        alert = driver.switch_to_alert()
         alert.accept()
     except:
         return failed('26', "no alert shown or alert can't be closed")
