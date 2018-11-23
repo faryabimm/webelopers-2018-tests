@@ -555,9 +555,9 @@ def test_14(ip, group_id, driver):
 
     # todo
     ##################
-    ut.login_to_django_admin(group_id=group_id, driver=driver, ip=ip, msg=msg)
-    if not ut.check_event_in_django_admin(ip, event, driver, msg):
-        return failed('14', msg)
+    #ut.login_to_django_admin(group_id=group_id, driver=driver, ip=ip, msg=msg)
+    #if not ut.check_event_in_django_admin(ip, event, driver, msg):
+    #    return failed('14', msg)
     ##################
 
     driver.get(ip)
@@ -802,9 +802,9 @@ def test_16(ip, group_id, driver):
  
     # todo maybe removed
     ####################
-    ut.login_to_django_admin(group_id=group_id, driver=driver, ip=ip, msg=msg)
-    if not ut.check_event_in_django_admin(ip, event, driver, msg):
-        return failed('16', msg)
+    #ut.login_to_django_admin(group_id=group_id, driver=driver, ip=ip, msg=msg)
+    #if not ut.check_event_in_django_admin(ip, event, driver, msg):
+    #    return failed('16', msg)
     ####################
 
     driver.get(ip)
@@ -1287,7 +1287,7 @@ def test_26(ip, group_id, driver):
     if not ut.check_navbar(False, driver, msg):
         return failed('26', msg)
     user_1 = User()
-    if not user_1.signup(driver, msg):
+    if not user_1.signup(driver, msg, send_type=False):
         return failed('26', msg) 
     if not user_1.login(driver, msg):
         return failed('26', msg)
