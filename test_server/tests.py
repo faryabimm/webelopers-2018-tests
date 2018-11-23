@@ -81,7 +81,7 @@ def test_3(ip, group_id, driver):
     # checking right user
     if not ut.check_navbar(True, driver, msg):
         return failed('3', msg)
-    login_error_message = "نام کاربری"
+    login_error_message = "نام کاربری یا گذرواژه"
     if login_error_message in driver.page_source:
         return failed('3', 'no login message error shown')
     if not ut.connect(ip, driver, msg):
