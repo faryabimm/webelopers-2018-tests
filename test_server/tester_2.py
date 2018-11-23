@@ -4,7 +4,7 @@ import time
 import tests
 import sys
 from selenium import webdriver
-for i in range(9,10):
+for i in range(23,24):
     print("{} TEST: {}".format(datetime.datetime.now().time(), i))
     try:
         driver = webdriver.Chrome()

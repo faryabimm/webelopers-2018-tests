@@ -1193,9 +1193,6 @@ def test_23(ip, group_id, driver):
         #########################
         #########################
 
-        if not user.logout(driver, msg):
-            return failed('23', msg)
-
     return passed('23')
 
 
