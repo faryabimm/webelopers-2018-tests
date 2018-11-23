@@ -9,7 +9,7 @@ options = webdriver.ChromeOptions()
 driver = webdriver.Chrome(chrome_options=options)
 # driver = webdriver.Firefox()
 ip = "http://192.168.194.119:8000"
-for i in [25]:
+for i in [23]:
     # if i not in [21]:
     #     continue
     test = getattr(tests, ('test_' + str(i)))

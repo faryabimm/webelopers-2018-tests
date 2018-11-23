@@ -997,10 +997,10 @@ def test_18(ip, group_id, driver):
 
         # todo maybe replaces with
         ##################
-        else:
-            ut.login_to_django_admin(group_id=group_id, driver=driver, ip=ip, msg=msg)
-            if not ut.check_reserve_in_django_admin(ip, event, user_student, driver, msg):
-                return failed('18', msg)
+        # else:
+        #     ut.login_to_django_admin(group_id=group_id, driver=driver, ip=ip, msg=msg)
+        #     if not ut.check_reserve_in_django_admin(ip, event, user_student, driver, msg):
+        #         return failed('18', msg)
         ##################
         # else:
         #     if valid not in driver.page_source:
@@ -1192,9 +1192,6 @@ def test_23(ip, group_id, driver):
         # todo REMOVE THESE LINES
         #########################
         #########################
-
-        if not user.logout(driver, msg):
-            return failed('23', msg)
 
     return passed('23')
 
