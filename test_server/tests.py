@@ -573,7 +573,7 @@ def test_14(ip, group_id, driver):
     error_invalid_date = 'تاریخ وارد شده معتبر نمی‌باشد'
 
     date1 = time.strftime('%Y-%m-%d', ut.random_date_time())
-    date2 = time.strftime('%Y-%m-%d', ut.random_date_time())
+    date1 = time.strftime('%Y-%m-%d', ut.random_date_time())
     time1 = ut.random_date_time()
     time2 = ut.random_time_gt(time1)
     time3 = ut.random_time_gt(time2)
@@ -799,7 +799,7 @@ def test_16(ip, group_id, driver):
     event.new()
     if not event.save(driver, msg, logout_login=False):
         return failed('16', msg)
-
+ 
     # todo maybe removed
     ####################
     ut.login_to_django_admin(group_id=group_id, driver=driver, ip=ip, msg=msg)
@@ -1271,7 +1271,7 @@ def test_25(ip, group_id, driver):
     search_button.click()
     username_link = None
     for a in driver.find_elements_by_xpath("//a"):
-        if a.text == user.username:
+        if user.username in a.text:
             username_link = a
             break
     if username_link is None:
@@ -1309,10 +1309,10 @@ def test_26(ip, group_id, driver):
     if remove_user is None:
         return failed('26', msg)
     remove_user.click()
-    username_field = ut.find_element_id(driver, "id_username", msg)
-    if username_field is None:
-        return failed('26', msg)
-    username_field.send_keys(user_1.username)
+    # username_field = ut.find_element_id(driver, "id_username", msg)
+    # if username_field is None:
+    #     return failed('26', msg)
+    # username_field.send_keys(user_1.username)
     #    submit = ut.find_element_id(driver, "id_remove_user", msg)
     #    if submit is None:
     #        return failed('26', msg)
@@ -1326,3 +1326,4 @@ def test_26(ip, group_id, driver):
     if ut.check_user_in_django_admin(ip,user_1, driver, msg):
         return failed('26', "user has not been removed")
     return passed('26')
+
