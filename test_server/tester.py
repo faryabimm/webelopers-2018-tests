@@ -9,13 +9,13 @@ options = webdriver.ChromeOptions()
 driver = webdriver.Chrome(chrome_options=options)
 # driver = webdriver.Firefox()
 ip = "http://192.168.194.119:8000"
-for i in [4]:
+for i in [25]:
     # if i not in [21]:
     #     continue
     test = getattr(tests, ('test_' + str(i)))
     print(test(ip, "3", driver))
-    driver.get(ip)
-    driver.delete_all_cookies()
+    # driver.get(ip)
+    # driver.delete_all_cookies()
 # driver.close()
 print(datetime.datetime.now().time())
 
